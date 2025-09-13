@@ -7,7 +7,6 @@ import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.repository.RoleRepository;
 import com.mathfactmissions.teacherscheduler.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -18,34 +17,43 @@ public class UserService {
 
     public final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserService(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
             RoleRepository roleRepository
     ) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
     }
 
-    public User createUser(CreateUserRequest dto) {
-        if (userRepository.existsByEmail(dto.getEmail())) {
+
+    public User createUser(String email) {
+        if (userRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException();
         }
+
+        String username = email.split("@")[0];
+
         User user = new User();
-        user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setUsername(dto.getUsername());
+        user.setEmail(email);
+        user.setUsername(username);
 
         // Assign default role
         Set<Role> role = roleRepository.findByName("ROLE_USER");
-        System.out.println("role " + role);
 
         user.setRoles(role);
 
         return userRepository.save(user);
+    }
+
+
+    public User findOrCreateUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseGet(() -> createUser(email));
+    }
+
+    public Optional<User> findByEmail (String email) {
+        return userRepository.findByEmail(email);
     }
 }
