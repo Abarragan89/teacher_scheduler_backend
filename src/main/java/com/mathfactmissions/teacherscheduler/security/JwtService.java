@@ -49,7 +49,7 @@ public class JwtService {
                 claimsBuilder.build()
         );
 
-        // Sign the JWT Object with our sectret key and the
+        // Sign the JWT Object with our secret key and the
         signedJWT.sign(new MACSigner(secretKey));
 
         return signedJWT.serialize();
