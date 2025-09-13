@@ -4,6 +4,7 @@ import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.security.JwtService;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -14,15 +15,17 @@ public class MagicLinkService {
 
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final String clientURL;
 
     @Autowired
     public MagicLinkService(
             JwtService jwtService,
-            EmailService emailService
-
+            EmailService emailService,
+            @Value("${client.url}") String clientURL
     ) {
         this.jwtService = jwtService;
         this.emailService = emailService;
+        this.clientURL = clientURL;
     }
 
     public void sendMagicLink(User user) throws JOSEException {
@@ -35,9 +38,9 @@ public class MagicLinkService {
         String magicToken = jwtService.generateToken(user.getEmail(), claims);
 
         // Build link
-        String link = "https://yourfrontend.com/magic-login?token=" + magicToken;
+        String link = clientURL + "magic-login?token=" + magicToken;
 
-        // Send email (use Postmark/SendGrid/etc.)
+        // Send email using resend
         emailService.sendEmail(user.getEmail(), link);
     }
 }
