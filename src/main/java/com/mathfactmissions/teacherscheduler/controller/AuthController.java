@@ -74,8 +74,8 @@ public class AuthController {
         accessClaims.put("roles", user.getRoles());
 
         // Generate real tokens
-        String accessToken = jwtService.generateToken(user.getEmail(), accessClaims);
-        String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("type", "refresh"));
+        String accessToken = jwtService.generateToken(user.getEmail(), accessClaims, 15); // 15 minute expiration
+        String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("type", "refresh"), 43200); // 30 day expiration
 
         // Cookies
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
@@ -91,7 +91,7 @@ public class AuthController {
                 .secure(true)
                 .sameSite("None")
                 .path("/")
-                .maxAge(604800) // 7 days
+                .maxAge(2592000) // 30 days
                 .build();
 
         // CSRF token
@@ -111,17 +111,26 @@ public class AuthController {
        // Validate refresh token
         JWTClaimsSet claims = jwtService.validateToken(refreshToken);
 
+        // Get user email
         String email = claims.getSubject();
 
-        // Generate new access token
-        String newAccessToken = jwtService.generateToken(email, Map.of("roles", claims.getClaim("roles")));
+        // Look up user
+        User user = userService.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Build new access token with queried roles
+        Map<String, Object> accessClaims = new HashMap<>();
+        accessClaims.put("roles", user.getRoles());
+
+        // Create new access token
+        String newAccessToken = jwtService.generateToken(email, accessClaims, 15);
 
         ResponseCookie newAccessCookie = ResponseCookie.from("access_token", newAccessToken)
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
                 .path("/")
-                .maxAge(900)
+                .maxAge(900) // 15 min
                 .build();
 
         return ResponseEntity.ok()
@@ -129,6 +138,31 @@ public class AuthController {
                 .body(Map.of("csrfToken", UUID.randomUUID().toString()));
 
     }
+
+    @PostMapping("/session")
+    public ResponseEntity<?> verifySession(@CookieValue(name="access_token", required = false) String accessToken) {
+
+       if (accessToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("authenticated", false));
+        }
+
+        try {
+            JWTClaimsSet claims = jwtService.validateToken(accessToken);
+
+            return ResponseEntity.ok(Map.of(
+                    "authenticated", true,
+                    "email", claims.getSubject(),
+                    "roles", claims.getClaim("roles"),
+                    "csrfToken", UUID.randomUUID().toString()
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("authenticated", false));
+        }
+    }
+
 
 
 }

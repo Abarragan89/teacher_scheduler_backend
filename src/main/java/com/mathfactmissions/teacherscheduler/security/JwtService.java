@@ -18,18 +18,15 @@ import java.util.Map;
 public class JwtService {
 
     private final byte[] secretKey;
-    private final long expirationMinutes;
 
     public JwtService(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration-minutes}") long expirationMinutes
+            @Value("${jwt.secret}") String secret
     ) {
         this.secretKey = secret.getBytes(StandardCharsets.UTF_8);
-        this.expirationMinutes = expirationMinutes;
     }
 
     // Create a JWT
-    public String generateToken(String subject, Map<String, Object> customClaims) throws JOSEException {
+    public String generateToken(String subject, Map<String, Object> customClaims, long expirationMinutes) throws JOSEException {
         Instant now = Instant.now();
 
         // Create the JWT object with standard payload
@@ -59,11 +56,13 @@ public class JwtService {
     public JWTClaimsSet validateToken(String token) throws ParseException, JOSEException {
         SignedJWT signedJWT = SignedJWT.parse(token);
         if (!signedJWT.verify(new MACVerifier(secretKey))) {
+            System.out.println("invalid signagture");
             throw new JOSEException("Invalid signature");
         }
 
         Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
         if (expirationTime.before(new Date())) {
+            System.out.println("ttoken epxired");
             throw new JOSEException("Token expired");
         }
 

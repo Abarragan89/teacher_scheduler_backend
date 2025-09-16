@@ -35,10 +35,10 @@ public class MagicLinkService {
         claims.put("magic", true);
         claims.put("roles", user.getRoles());
 
-        String magicToken = jwtService.generateToken(user.getEmail(), claims);
+        String magicToken = jwtService.generateToken(user.getEmail(), claims, 15);
 
         // Build link
-        String link = clientURL + "magic-login?token=" + magicToken;
+        String link = clientURL + "/user-verification?token=" + magicToken;
 
         // Send email using resend
         emailService.sendEmail(user.getEmail(), link);
