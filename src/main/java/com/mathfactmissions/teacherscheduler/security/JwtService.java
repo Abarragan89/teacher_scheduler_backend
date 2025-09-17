@@ -56,13 +56,11 @@ public class JwtService {
     public JWTClaimsSet validateToken(String token) throws ParseException, JOSEException {
         SignedJWT signedJWT = SignedJWT.parse(token);
         if (!signedJWT.verify(new MACVerifier(secretKey))) {
-            System.out.println("invalid signagture");
             throw new JOSEException("Invalid signature");
         }
 
         Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
         if (expirationTime.before(new Date())) {
-            System.out.println("ttoken epxired");
             throw new JOSEException("Token expired");
         }
 
