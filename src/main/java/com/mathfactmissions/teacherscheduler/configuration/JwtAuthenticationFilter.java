@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -41,11 +42,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (accessTokenCookie.isPresent()) {
                 try {
+
+                    // 2. Get JWT data to put in cookie
                     JWTClaimsSet claims = jwtService.validateToken(accessTokenCookie.get().getValue());
+                    UUID userId = UUID.fromString(claims.getStringClaim("user_id"));
+                    String email = claims.getSubject();
+
+                    UserPrincipal principal = new UserPrincipal(email, userId);
 
                     // 2. Create Authentication object
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            claims.getSubject(),   // principal (email)
+                            principal,   // principal (email)
                             null,                 // credentials (none)
                             Collections.emptyList() // roles/authorities if you want
                     );
@@ -56,6 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 } catch (Exception e) {
                     // Token invalid or expired → ignore, let it proceed as unauthenticated
+                    System.out.println("exception " + e);
                 }
             }
         }

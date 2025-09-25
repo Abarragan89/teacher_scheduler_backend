@@ -1,13 +1,13 @@
 package com.mathfactmissions.teacherscheduler.controller;
 
 import com.mathfactmissions.teacherscheduler.dto.CreateUserRequest;
-import com.mathfactmissions.teacherscheduler.dto.LoginRequest;
 import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.security.JwtService;
 import com.mathfactmissions.teacherscheduler.service.MagicLinkService;
 import com.mathfactmissions.teacherscheduler.service.UserService;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.JWTClaimsSet;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
@@ -52,7 +51,9 @@ public class AuthController {
     }
 
     @PostMapping("/magic-link-verify")
-    public ResponseEntity<?> verifyMagicLink(@RequestBody Map<String, String> body)
+    public ResponseEntity<?> verifyMagicLink(
+            @RequestBody Map<String, String> body
+    )
             throws JOSEException, ParseException {
 
         // Get magic token from request
@@ -72,6 +73,7 @@ public class AuthController {
         // Build claims for access token
         Map<String, Object> accessClaims = new HashMap<>();
         accessClaims.put("roles", user.getRoles());
+        accessClaims.put("user_id", user.getId());
 
         // Generate real tokens
         String accessToken = jwtService.generateToken(user.getEmail(), accessClaims, 15); // 15 minute expiration
@@ -94,13 +96,10 @@ public class AuthController {
                 .maxAge(2592000) // 30 days
                 .build();
 
-        // CSRF token
-        String csrfToken = UUID.randomUUID().toString();
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(Map.of("csrfToken", csrfToken));
+                .body(Map.of("message", "Link Verified"));
     }
 
 
@@ -121,6 +120,7 @@ public class AuthController {
         // Build new access token with queried roles
         Map<String, Object> accessClaims = new HashMap<>();
         accessClaims.put("roles", user.getRoles());
+        accessClaims.put("user_id", user.getId());
 
         // Create new access token
         String newAccessToken = jwtService.generateToken(email, accessClaims, 15);
@@ -135,12 +135,14 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
-                .body(Map.of("csrfToken", UUID.randomUUID().toString()));
+                .body(Map.of("message", "Token refreshed"));
 
     }
 
     @PostMapping("/session")
-    public ResponseEntity<?> verifySession(@CookieValue(name="access_token", required = false) String accessToken) {
+    public ResponseEntity<?> verifySession(
+            @CookieValue(name="access_token", required = false) String accessToken
+    ) {
 
        if (accessToken == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -154,8 +156,8 @@ public class AuthController {
                     "authenticated", true,
                     "email", claims.getSubject(),
                     "roles", claims.getClaim("roles"),
-                    "csrfToken", UUID.randomUUID().toString()
-            ));
+                    "message", "session verified")
+            );
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -163,6 +165,30 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser(HttpServletResponse response) {
+        // Clear access token cookie
+        ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0) // expire immediately
+                .build();
 
+        // Clear refresh token cookie
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .build();
 
+        response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+        // If you’re storing refresh tokens in DB/Redis, also delete it there
+        // refreshTokenService.invalidateUserTokens(userId);
+
+        return ResponseEntity.ok("Logged out successfully");
+    }
 }

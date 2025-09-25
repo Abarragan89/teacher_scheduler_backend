@@ -1,6 +1,5 @@
 package com.mathfactmissions.teacherscheduler.service;
 
-import com.mathfactmissions.teacherscheduler.dto.CreateUserRequest;
 import com.mathfactmissions.teacherscheduler.exception.EmailAlreadyExistsException;
 import com.mathfactmissions.teacherscheduler.model.Role;
 import com.mathfactmissions.teacherscheduler.model.User;

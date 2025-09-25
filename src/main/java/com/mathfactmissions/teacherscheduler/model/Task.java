@@ -1,17 +1,17 @@
 package com.mathfactmissions.teacherscheduler.model;
 
 import jakarta.persistence.*;
-import java.util.UUID;
+
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "tasks")
+public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
+    private Long id;
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -28,7 +28,7 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
     // getters and setters
-    public UUID getId() {return id;}
+    public Long getId() {return id;}
 
     public String getEmail() { return email;}
     public void setEmail(String email) {this.email = email;}
