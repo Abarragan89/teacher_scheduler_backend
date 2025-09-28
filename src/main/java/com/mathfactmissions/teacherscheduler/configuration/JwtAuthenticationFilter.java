@@ -26,6 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
     }
 
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -34,12 +35,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 1. Get access_token cookie
         Cookie[] cookies = request.getCookies();
+
+
         if (cookies != null) {
             Optional<Cookie> accessTokenCookie =
                     java.util.Arrays.stream(cookies)
                             .filter(c -> "access_token".equals(c.getName()))
                             .findFirst();
 
+            System.out.println("access token in jwtFilter" + accessTokenCookie);
             if (accessTokenCookie.isPresent()) {
                 try {
 

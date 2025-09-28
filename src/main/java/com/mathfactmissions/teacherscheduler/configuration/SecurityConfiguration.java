@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -32,8 +33,14 @@ public class SecurityConfiguration {
         this.jwtFilter = jwtFilter;
     }
 
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        This makes the shorter token the correct version to check from frontend to backend
+        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+        // Set the attribute name to null to force token generation on all requests
+        requestHandler.setCsrfRequestAttributeName(null);
+
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf
@@ -42,16 +49,19 @@ public class SecurityConfiguration {
                                 "/auth/magic-link-request",
                                 "/auth/magic-link-verify",
                                 "/auth/logout",
-                                "/csrf/**",
-                                "/auth/refresh"
-                        ))
-
-//                .csrf(csrf -> csrf.disable())
+                                "/auth/refresh")
+                        .csrfTokenRequestHandler(requestHandler)
+                )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/csrf/**").permitAll()
+                        .requestMatchers(
+                                "/auth/magic-link-request",
+                                "/auth/magic-link-verify",
+                                "/auth/logout",
+                                "/auth/refresh"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)

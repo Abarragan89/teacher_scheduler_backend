@@ -139,11 +139,11 @@ public class AuthController {
 
     }
 
-    @PostMapping("/session")
+    @GetMapping("/session")
     public ResponseEntity<?> verifySession(
             @CookieValue(name="access_token", required = false) String accessToken
     ) {
-
+        System.out.println("ACEESS TOKEN IN SESSIoN " + accessToken);
        if (accessToken == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("authenticated", false));
