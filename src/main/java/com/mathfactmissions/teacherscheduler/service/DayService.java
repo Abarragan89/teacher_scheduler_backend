@@ -1,10 +1,12 @@
 package com.mathfactmissions.teacherscheduler.service;
 
-import com.mathfactmissions.teacherscheduler.dto.DayRequest;
+import com.mathfactmissions.teacherscheduler.dto.day.projections.DaySummary;
+import com.mathfactmissions.teacherscheduler.dto.day.response.DayResponse;
 import com.mathfactmissions.teacherscheduler.model.Day;
+import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.repository.DayRepository;
+import com.mathfactmissions.teacherscheduler.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,27 +17,38 @@ import java.util.UUID;
 @Service
 public class DayService {
 
-    public final DayRepository dayRepository;
+    private final DayRepository dayRepository;
+    private final UserService userService;
 
     @Autowired
-    public DayService(DayRepository dayRepository) {
+    public DayService(DayRepository dayRepository, UserService userService) {
         this.dayRepository = dayRepository;
+        this.userService = userService;
     }
 
 
-    public Day createOrFindDay(UUID userId, LocalDate dayDate) {
+    public DayResponse createOrFindDay(UUID userId, LocalDate dayDate) {
 
-        Optional<Day> existing = dayRepository.findByUserIdAndDayDate(userId, dayDate);
-        return existing.orElseGet(() -> {
-            Day newDay = new Day();
-            newDay.setDayDate(dayDate);
-            newDay.setUserId(userId);
-            return dayRepository.save(newDay);
-        });
+        Optional<DaySummary> existing = dayRepository.findByUserIdAndDayDate(userId, dayDate);
 
+        return existing
+                .map(day -> new DayResponse(day.getId(), day.getDayDate()))
+                .orElseGet(() -> {
+                    Day newDay = new Day();
+                    User user = userService.findById(userId)
+                            .orElseThrow(() -> new RuntimeException("User not found"));
+                    newDay.setUser(user);
+                    newDay.setDayDate(dayDate);
+                    dayRepository.save(newDay);
+                    return new DayResponse(newDay.getId(), newDay.getDayDate());
+                });
     }
 
-    public List<Day> findAllDays() {
-        return dayRepository.findAll();
+
+    public List<DayResponse> findAllDays() {
+        List<Day> days = dayRepository.findAll();
+        return days.stream()
+                .map(day -> new DayResponse(day.getId(), day.getDayDate()))
+                .toList();
     }
 }

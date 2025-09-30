@@ -4,14 +4,15 @@ import jakarta.persistence.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tasks")
 public class Task {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -28,7 +29,7 @@ public class Task {
     private Set<Role> roles = new HashSet<>();
 
     // getters and setters
-    public Long getId() {return id;}
+    public UUID getId() {return id;}
 
     public String getEmail() { return email;}
     public void setEmail(String email) {this.email = email;}

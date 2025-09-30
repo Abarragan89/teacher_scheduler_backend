@@ -8,8 +8,10 @@ import com.mathfactmissions.teacherscheduler.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -24,6 +26,10 @@ public class UserService {
     ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+    }
+
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 
 
@@ -46,7 +52,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-
     public User findOrCreateUser(String email) {
         return userRepository.findByEmail(email)
                 .orElseGet(() -> createUser(email));
@@ -55,4 +60,9 @@ public class UserService {
     public Optional<User> findByEmail (String email) {
         return userRepository.findByEmail(email);
     }
+
+    public Optional<User> findById(UUID id) {
+        return userRepository.findById(id);
+    }
+
 }

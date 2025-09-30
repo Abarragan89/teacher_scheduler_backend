@@ -1,9 +1,12 @@
 package com.mathfactmissions.teacherscheduler.controller;
 
-import com.mathfactmissions.teacherscheduler.dto.DayRequest;
+import com.mathfactmissions.teacherscheduler.dto.day.projections.DaySummary;
+import com.mathfactmissions.teacherscheduler.dto.day.request.DayRequest;
+import com.mathfactmissions.teacherscheduler.dto.day.response.DayResponse;
 import com.mathfactmissions.teacherscheduler.model.Day;
 import com.mathfactmissions.teacherscheduler.security.UserPrincipal;
 import com.mathfactmissions.teacherscheduler.service.DayService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,19 +28,23 @@ public class DaysController {
 
 
     @GetMapping("/get-all-days")
-    public ResponseEntity<List<Day>> findAllDays() {
-        List<Day>  days = dayService.findAllDays();
+    public ResponseEntity<List<DayResponse>> getAllDays() {
+        List<DayResponse>  days = dayService.findAllDays();
         return ResponseEntity.ok(days);
     }
 
     @PostMapping("/find-or-create")
-    public ResponseEntity<Day> findOrCreateDay(@RequestBody DayRequest request) {
+    public ResponseEntity<DayResponse> findOrCreateDay(@RequestBody @Valid DayRequest request) {
 
-        UserPrincipal userInfo = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        // Get the currently authenticated user ID
+        UserPrincipal userInfo = (UserPrincipal) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        UUID userId = userInfo.getId();
 
-        request.setUserId(userInfo.getId());
-
-        Day day = dayService.createOrFindDay(userInfo.getId(), request.getDayDate());
+        // Call the service to find or create the day
+        DayResponse day = dayService.createOrFindDay(userId, request.getDayDate());
 
         return ResponseEntity.ok(day);
     }

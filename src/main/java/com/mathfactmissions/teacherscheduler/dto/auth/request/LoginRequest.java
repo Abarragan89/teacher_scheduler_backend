@@ -1,4 +1,4 @@
-package com.mathfactmissions.teacherscheduler.dto;
+package com.mathfactmissions.teacherscheduler.dto.auth.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

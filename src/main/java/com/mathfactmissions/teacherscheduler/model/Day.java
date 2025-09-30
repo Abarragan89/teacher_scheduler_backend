@@ -1,23 +1,27 @@
 package com.mathfactmissions.teacherscheduler.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "days")
+@Table(
+        name = "days",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "day_date"})
+)
 public class Day {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "user_id", nullable = false)
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
+    private User user;
 
-    @Column(name="day_date", nullable = false)
+    @Column(name = "day_date", nullable = false)
     private LocalDate dayDate;
 
     @Column(name = "created_at", insertable = false, updatable = false)
@@ -26,6 +30,7 @@ public class Day {
     @Column(name = "updated_at", insertable = false)
     private OffsetDateTime updatedAt;
 
+    // Getters and Setters
     public UUID getId() {
         return id;
     }
@@ -34,12 +39,12 @@ public class Day {
         this.id = id;
     }
 
-    public UUID getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(UUID userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public LocalDate getDayDate() {

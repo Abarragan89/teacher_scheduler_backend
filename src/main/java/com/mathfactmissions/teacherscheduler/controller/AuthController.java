@@ -1,6 +1,6 @@
 package com.mathfactmissions.teacherscheduler.controller;
 
-import com.mathfactmissions.teacherscheduler.dto.CreateUserRequest;
+import com.mathfactmissions.teacherscheduler.dto.user.request.CreateUserRequest;
 import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.security.JwtService;
 import com.mathfactmissions.teacherscheduler.service.MagicLinkService;

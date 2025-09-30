@@ -60,7 +60,6 @@ CREATE TABLE IF NOT EXISTS schedules (
     day_id UUID NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    notes TEXT,
     CONSTRAINT fk_day FOREIGN KEY (day_id) REFERENCES days(id) ON DELETE CASCADE,
     CONSTRAINT uq_schedule_day UNIQUE (day_id) -- one schedule per day
 );
