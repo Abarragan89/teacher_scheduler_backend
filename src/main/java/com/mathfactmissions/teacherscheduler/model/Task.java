@@ -1,42 +1,71 @@
 package com.mathfactmissions.teacherscheduler.model;
 
 import jakarta.persistence.*;
+import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tasks")
+@Table(
+        name = "tasks",
+        indexes = {
+                @Index(name = "idx_tasks_schedule_id", columnList = "schedule_id"),
+                @Index(name = "idx_tasks_position", columnList = "schedule_id, position")
+        }
+)
 public class Task {
 
     @Id
     @GeneratedValue
     private UUID id;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "schedule_id", nullable = false)
+    private Schedule schedule;
 
-    @Column(nullable = false)
-    private String username;
+    @Setter
+    @Column(name = "title", nullable = false)
+    private String title;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name ="user_roles",
-            joinColumns = @JoinColumn(name = "user_id"), // FK pointing to User
-            inverseJoinColumns = @JoinColumn(name = "role_id") // FK pointing to Role
-    )
-    private Set<Role> roles = new HashSet<>();
+    @Setter
+    @Column(name = "completed", nullable = false)
+    private Boolean completed = false;
 
-    // getters and setters
-    public UUID getId() {return id;}
+    @Setter
+    @Column(name = "position", nullable = false)
+    private Integer position;
 
-    public String getEmail() { return email;}
-    public void setEmail(String email) {this.email = email;}
+    @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT NOW()")
+    private Instant createdAt;
 
-    public void setUsername(String username) { this.username = username;}
-    public String getUsername() { return username;}
+    @Column(name="updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT NOW()")
+    private Instant updatedAt;
 
-    public Set<Role> getRoles() {return roles;}
-    public void setRoles(Set<Role> roles) {this.roles = roles;}
+    // --- lifecycle hooks --- //
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
+    }
+
+    @PreUpdate
+    protected  void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
+
+    // --- Getters & Setters ---
+    public UUID getId() { return id; }
+
+    public Schedule getSchedule() { return schedule; }
+    public String getTitle() { return title; }
+    public Boolean getCompleted() { return completed; }
+    public Integer getPosition() { return position; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
+
+
 }
+

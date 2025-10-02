@@ -1,6 +1,8 @@
 package com.mathfactmissions.teacherscheduler.model;
 
 import jakarta.persistence.*;
+import lombok.Setter;
+
 import java.util.UUID;
 
 @Entity
@@ -11,6 +13,7 @@ public class Role {
     @GeneratedValue
     private UUID id;
 
+    @Setter
     @Column(unique = true, nullable = false)
     private String name;
 
@@ -18,15 +21,7 @@ public class Role {
         return id;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }

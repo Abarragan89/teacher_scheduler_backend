@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS schedules (
 CREATE TABLE IF NOT EXISTS tasks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     schedule_id UUID NOT NULL,
-    title TEXT NOT NULL,
+    title VARCHAR(255) NOT NULL, -- changed from TEXT for consistency
     completed BOOLEAN DEFAULT FALSE,
     position INTEGER NOT NULL, -- for ordering tasks within a schedule
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

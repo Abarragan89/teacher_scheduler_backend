@@ -1,8 +1,13 @@
 package com.mathfactmissions.teacherscheduler.model;
 
+
 import jakarta.persistence.*;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -17,57 +22,41 @@ public class Day {
     @Column(updatable = false, nullable = false)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private User user;
 
+    @Setter
     @Column(name = "day_date", nullable = false)
     private LocalDate dayDate;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @OneToMany(mappedBy = "day", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Schedule> schedules = new ArrayList<Schedule>();
+
+    @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at", insertable = false)
+    @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
-    // Getters and Setters
-    public UUID getId() {
-        return id;
+    // --- Lifecycle hooks ---
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = OffsetDateTime.now();
+        this.updatedAt = OffsetDateTime.now();
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = OffsetDateTime.now();
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public LocalDate getDayDate() {
-        return dayDate;
-    }
-
-    public void setDayDate(LocalDate dayDate) {
-        this.dayDate = dayDate;
-    }
-
-    public OffsetDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(OffsetDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public OffsetDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(OffsetDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+    // --- Getters ---
+    public UUID getId() { return id; }
+    public User getUser() { return user; }
+    public LocalDate getDayDate() { return dayDate; }
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public OffsetDateTime getUpdatedAt() { return updatedAt; }
+    public List<Schedule> getSchedules() {return schedules;}
 }

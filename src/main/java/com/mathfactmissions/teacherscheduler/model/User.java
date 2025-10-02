@@ -1,6 +1,8 @@
 package com.mathfactmissions.teacherscheduler.model;
 
 import jakarta.persistence.*;
+import lombok.Setter;
+
 import java.util.UUID;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,12 +15,15 @@ public class User {
     @GeneratedValue
     private UUID id;
 
+    @Setter
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Setter
     @Column(nullable = false)
     private String username;
 
+    @Setter
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name ="user_roles",
@@ -31,11 +36,8 @@ public class User {
     public UUID getId() {return id;}
 
     public String getEmail() { return email;}
-    public void setEmail(String email) {this.email = email;}
 
-    public void setUsername(String username) { this.username = username;}
     public String getUsername() { return username;}
 
     public Set<Role> getRoles() {return roles;}
-    public void setRoles(Set<Role> roles) {this.roles = roles;}
 }

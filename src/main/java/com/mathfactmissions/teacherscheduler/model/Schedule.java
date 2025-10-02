@@ -1,10 +1,15 @@
 package com.mathfactmissions.teacherscheduler.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(
         name = "schedules",
@@ -16,14 +21,33 @@ public class Schedule {
     @GeneratedValue
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "day_id", nullable = false)
     private Day day;
 
+    @Setter
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Task> tasks = new ArrayList<Task>();
+
     @Column (name = "created_at", updatable = false)
-    private Instant createdAt = Instant.now();
+    private Instant createdAt;
 
     @Column(name = "updated_at")
-    private Instant updatedAt = Instant.now();
+    private Instant updatedAt;
+
+
+    @PrePersist
+    protected  void onCreate() {
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
+    }
+
+    @PreUpdate
+    protected  void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
+
 
 }
+
