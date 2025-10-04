@@ -5,9 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Entity
@@ -29,7 +27,7 @@ public class Schedule {
     @Setter
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
-    private List<Task> tasks = new ArrayList<Task>();
+    private Set<Task> tasks = new HashSet<Task>();
 
     @Column (name = "created_at", updatable = false)
     private Instant createdAt;

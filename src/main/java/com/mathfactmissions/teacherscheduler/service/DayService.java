@@ -3,6 +3,7 @@ package com.mathfactmissions.teacherscheduler.service;
 import com.mathfactmissions.teacherscheduler.dto.day.response.DayResponse;
 import com.mathfactmissions.teacherscheduler.dto.schedule.response.ScheduleResponse;
 import com.mathfactmissions.teacherscheduler.dto.task.response.TaskResponse;
+import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.response.TaskOutlineResponse;
 import com.mathfactmissions.teacherscheduler.model.Day;
 import com.mathfactmissions.teacherscheduler.model.Schedule;
 import com.mathfactmissions.teacherscheduler.model.User;
@@ -20,22 +21,19 @@ public class DayService {
 
     private final DayRepository dayRepository;
     private final UserService userService;
-    private final ScheduleService scheduleService;
 
     @Autowired
     public DayService(
             DayRepository dayRepository,
-            UserService userService,
-            ScheduleService scheduleService
+            UserService userService
     ) {
         this.dayRepository = dayRepository;
         this.userService = userService;
-        this.scheduleService = scheduleService;
     }
 
     @Transactional
     public DayResponse createOrFindDay(UUID userId, LocalDate dayDate) {
-        return dayRepository.findDayWithAllData(userId, dayDate)
+        return dayRepository.findByUser_IdAndDayDate(userId, dayDate)
                 .map(this::mapToDayResponse)
                 .orElseGet(() -> createNewDay(userId, dayDate));
     }
@@ -60,12 +58,29 @@ public class DayService {
         List<ScheduleResponse> scheduleResponses = day.getSchedules().stream()
                 .map(schedule -> {
                     List<TaskResponse> taskResponses = schedule.getTasks().stream()
-                            .map(task -> TaskResponse.builder()
-                                    .id(task.getId())
-                                    .title(task.getTitle())
-                                    .position(task.getPosition())
-                                    .completed(task.getCompleted())
-                                    .build())
+                            .map(task -> {
+                                // Map outline items for this task
+                                List<TaskOutlineResponse> outlineResponses = task.getOutlineItems().stream()
+                                        .map(item -> TaskOutlineResponse.builder()
+                                                .id(item.getId())
+                                                .position(item.getPosition())
+                                                .indentLevel(item.getIndentLevel())
+                                                .text(item.getText())
+                                                .completed(item.getCompleted())
+                                                .build())
+                                        .toList();
+
+                                // Build the TaskResponse including the outline items
+                                TaskResponse newTask =  TaskResponse.builder()
+                                        .id(task.getId())
+                                        .title(task.getTitle())
+                                        .position(task.getPosition())
+                                        .completed(task.getCompleted())
+                                        .outlineItems(outlineResponses)
+                                        .build();
+                                System.out.println("new task " + newTask);
+                                return newTask;
+                            })
                             .toList();
 
                     return new ScheduleResponse(schedule.getId(), taskResponses);
@@ -74,12 +89,4 @@ public class DayService {
 
         return new DayResponse(day.getId(), day.getDayDate(), scheduleResponses);
     }
-
-
-//    public List<DayResponse> findAllDays() {
-//        List<Day> days = dayRepository.findAll();
-//        return days.stream()
-//                .map(day -> new DayResponse(day.getId(), day.getDayDate(), day.getSchedules()))
-//                .toList();
-//    }
 }

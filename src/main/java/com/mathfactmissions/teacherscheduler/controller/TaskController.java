@@ -26,10 +26,8 @@ public class TaskController {
 
     @PostMapping("/create")
     public ResponseEntity<TaskResponse> createTask(@RequestBody @Valid CreateTaskRequest request) {
-
         TaskResponse newTask = taskService
                 .addTask(request.scheduleId(), request.title(), request.position());
-
         return ResponseEntity.ok(newTask);
     }
 }

@@ -1,6 +1,6 @@
 package com.mathfactmissions.teacherscheduler.dto.task.response;
 
-import com.mathfactmissions.teacherscheduler.model.TaskOutlineItem;
+import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.response.TaskOutlineResponse;
 import lombok.Builder;
 import java.util.List;
 import java.util.UUID;
@@ -11,5 +11,5 @@ public record TaskResponse(
          Integer position,
          UUID id,
          Boolean completed,
-         List<TaskOutlineItem> outlineItems
+         List<TaskOutlineResponse> outlineItems
 ) {}
