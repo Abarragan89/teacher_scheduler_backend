@@ -42,7 +42,7 @@ public class DaysController {
         UUID userId = userInfo.getId();
 
         // Call the service to find or create the day
-        DayResponse day = dayService.createOrFindDay(userId, request.getDayDate());
+        DayResponse day = dayService.createOrFindDay(userId, request.dayDate());
         return ResponseEntity.ok(day);
     }
 

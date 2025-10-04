@@ -1,8 +1,11 @@
 package com.mathfactmissions.teacherscheduler.model;
 
-
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -15,6 +18,9 @@ import java.util.UUID;
         name = "days",
         uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "day_date"})
 )
+@EntityListeners(AuditingEntityListener.class)
+@Getter
+@Setter
 public class Day {
 
     @Id
@@ -22,41 +28,21 @@ public class Day {
     @Column(updatable = false, nullable = false)
     private UUID id;
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private User user;
 
-    @Setter
     @Column(name = "day_date", nullable = false)
     private LocalDate dayDate;
 
     @OneToMany(mappedBy = "day", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Schedule> schedules = new ArrayList<Schedule>();
+    private List<Schedule> schedules = new ArrayList<>();
 
-    @Column(name = "created_at", updatable = false)
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
-
-    // --- Lifecycle hooks ---
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = OffsetDateTime.now();
-        this.updatedAt = OffsetDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = OffsetDateTime.now();
-    }
-
-    // --- Getters ---
-    public UUID getId() { return id; }
-    public User getUser() { return user; }
-    public LocalDate getDayDate() { return dayDate; }
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-    public OffsetDateTime getUpdatedAt() { return updatedAt; }
-    public List<Schedule> getSchedules() {return schedules;}
 }

@@ -1,6 +1,7 @@
 package com.mathfactmissions.teacherscheduler.controller;
 
 import com.mathfactmissions.teacherscheduler.dto.user.request.CreateUserRequest;
+import com.mathfactmissions.teacherscheduler.dto.user.response.UserResponse;
 import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.security.JwtService;
 import com.mathfactmissions.teacherscheduler.service.MagicLinkService;
@@ -42,11 +43,11 @@ public class AuthController {
     @PostMapping("/magic-link-request")
     public ResponseEntity<?> requestMagicLink(@Valid @RequestBody CreateUserRequest dto) throws JOSEException {
         // Ensure user exists or create them
-        User user = userService.findOrCreateUser(dto.getEmail());
+        UserResponse user = userService.findOrCreateUser(dto.email());
         magicLinkService.sendMagicLink(user);
         return ResponseEntity.ok(Map.of(
                 "message", "Magic link sent",
-                "email", user.getEmail()
+                "email", user.email()
         ));
     }
 

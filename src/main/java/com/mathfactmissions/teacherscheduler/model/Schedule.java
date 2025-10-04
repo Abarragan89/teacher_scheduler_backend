@@ -28,6 +28,7 @@ public class Schedule {
 
     @Setter
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
     private List<Task> tasks = new ArrayList<Task>();
 
     @Column (name = "created_at", updatable = false)

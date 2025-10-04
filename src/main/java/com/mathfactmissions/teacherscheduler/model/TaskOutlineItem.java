@@ -7,8 +7,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -18,43 +16,37 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-@Table(
-        name = "tasks",
-        indexes = {
-                @Index(name = "idx_tasks_schedule_id", columnList = "schedule_id"),
-                @Index(name = "idx_tasks_position", columnList = "schedule_id, position")
-        }
-)
-public class Task {
+@Table(name = "outline_items")
+public class TaskOutlineItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, updatable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "schedule_id", nullable = false)
-    private Schedule schedule;
-
-    @Column(name = "title", nullable = false)
-    private String title;
+    @JoinColumn(name = "task_id", nullable = false)
+    private Task task;
 
     @Builder.Default
     @Column(name = "completed", nullable = false)
     private Boolean completed = false;
 
+    @Builder.Default
+    @Column(name = "indent_level", nullable = false)
+    private Integer indentLevel = 0;
+
     @Column(name = "position", nullable = false)
     private Integer position;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TaskOutlineItem> outlineItems = new ArrayList<>();
+    @Column(name = "text", nullable = false)
+    private String text;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @LastModifiedDate
-    @Column(name="updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 }

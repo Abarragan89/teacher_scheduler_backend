@@ -1,16 +1,12 @@
 package com.mathfactmissions.teacherscheduler.dto.task.request;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
 
 import java.util.UUID;
 
-@Getter
-@Setter
-public class CreateTaskRequest {
-
-    public Integer position;
-    public String title;
-    public UUID scheduleId;
-
-}
+@Builder
+public record CreateTaskRequest(
+         Integer position,
+         String title,
+         UUID scheduleId
+) {};

@@ -2,6 +2,7 @@ package com.mathfactmissions.teacherscheduler.service;
 
 import com.mathfactmissions.teacherscheduler.dto.day.response.DayResponse;
 import com.mathfactmissions.teacherscheduler.dto.schedule.response.ScheduleResponse;
+import com.mathfactmissions.teacherscheduler.dto.task.response.TaskResponse;
 import com.mathfactmissions.teacherscheduler.model.Day;
 import com.mathfactmissions.teacherscheduler.model.Schedule;
 import com.mathfactmissions.teacherscheduler.model.User;
@@ -57,7 +58,18 @@ public class DayService {
 
     private DayResponse mapToDayResponse(Day day) {
         List<ScheduleResponse> scheduleResponses = day.getSchedules().stream()
-                .map(s -> new ScheduleResponse(s.getId()))
+                .map(schedule -> {
+                    List<TaskResponse> taskResponses = schedule.getTasks().stream()
+                            .map(task -> TaskResponse.builder()
+                                    .id(task.getId())
+                                    .title(task.getTitle())
+                                    .position(task.getPosition())
+                                    .completed(task.getCompleted())
+                                    .build())
+                            .toList();
+
+                    return new ScheduleResponse(schedule.getId(), taskResponses);
+                })
                 .toList();
 
         return new DayResponse(day.getId(), day.getDayDate(), scheduleResponses);

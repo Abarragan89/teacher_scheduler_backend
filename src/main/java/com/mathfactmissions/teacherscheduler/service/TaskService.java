@@ -22,6 +22,11 @@ public class TaskService {
         this.scheduleService = scheduleService;
     }
 
+    public Task findById(UUID id) {
+        return taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+    }
+
     public TaskResponse addTask(UUID scheduleId, String taskTitle, Integer position) {
 
         // Find parent schedule
@@ -33,15 +38,14 @@ public class TaskService {
         task.setTitle(taskTitle);
         task.setPosition(position);
         task.setSchedule(schedule);
-        Task newTask = taskRepository.save(task);
+        taskRepository.save(task);
 
-        TaskResponse response = new TaskResponse();
-        response.setCompleted(false);
-        response.setTitle(taskTitle);
-        response.setPosition(position);
-        response.setId(newTask.getId());
-
-        return response;
+        return TaskResponse.builder()
+                .completed(task.getCompleted())
+                .title(task.getTitle())
+                .position(task.getPosition())
+                .id(task.getId())
+                .build();
     }
 
 }

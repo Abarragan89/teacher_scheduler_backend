@@ -1,16 +1,15 @@
 package com.mathfactmissions.teacherscheduler.dto.task.response;
 
-import lombok.Getter;
-import lombok.Setter;
-
+import com.mathfactmissions.teacherscheduler.model.TaskOutlineItem;
+import lombok.Builder;
+import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Setter
-public class TaskResponse {
-
-    private String title;
-    private Integer position;
-    private UUID id;
-    private Boolean completed;
-}
+@Builder
+public record TaskResponse(
+         String title,
+         Integer position,
+         UUID id,
+         Boolean completed,
+         List<TaskOutlineItem> outlineItems
+) {}
