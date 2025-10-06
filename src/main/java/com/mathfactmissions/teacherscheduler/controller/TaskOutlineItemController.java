@@ -1,15 +1,17 @@
 package com.mathfactmissions.teacherscheduler.controller;
 
-
+import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.request.BatchOutlinePositionUpdateRequest;
+import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.request.OutlineItemPositionUpdateDTO;
 import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.request.TaskOutlineRequest;
 import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.request.UpdateTaskOutlineItemRequest;
 import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.response.TaskOutlineResponse;
-import com.mathfactmissions.teacherscheduler.model.TaskOutlineItem;
 import com.mathfactmissions.teacherscheduler.service.TaskOutlineItemService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -56,6 +58,22 @@ public class TaskOutlineItemController {
         taskOutlineItemService.deleteTaskItem(itemId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/batch-update-positions")
+    public ResponseEntity<?> batchUpdateOutlineItemPositions(@RequestBody BatchOutlinePositionUpdateRequest request) {
+        try {
+            List<OutlineItemPositionUpdateDTO> items = request.items();
+            taskOutlineItemService.batchUpdateOutlineItemPositions(items);
+            return ResponseEntity.ok(Map.of(
+                    "message", "Outline item positions updated successfully",
+                    "updatedCount", items.size()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", "Batch update failed: " + e.getMessage()
+            ));
+        }
     }
 
 }

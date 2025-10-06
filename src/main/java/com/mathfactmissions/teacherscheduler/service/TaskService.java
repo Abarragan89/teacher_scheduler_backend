@@ -1,12 +1,15 @@
 package com.mathfactmissions.teacherscheduler.service;
 
+import com.mathfactmissions.teacherscheduler.dto.task.request.TaskPositionUpdateDTO;
 import com.mathfactmissions.teacherscheduler.dto.task.response.TaskBasicResponse;
 import com.mathfactmissions.teacherscheduler.dto.task.response.TaskResponse;
 import com.mathfactmissions.teacherscheduler.model.Schedule;
 import com.mathfactmissions.teacherscheduler.model.Task;
 import com.mathfactmissions.teacherscheduler.repository.TaskRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -70,5 +73,18 @@ public class TaskService {
 
     public void deleteTask(UUID taskId) {
         taskRepository.deleteById(taskId);
+    }
+
+    @Transactional
+    public void batchUpdateTaskPositions(List<TaskPositionUpdateDTO> taskUpdates) {
+        for (TaskPositionUpdateDTO dto : taskUpdates) {
+            Task task = taskRepository.findById(dto.id())
+                    .orElseThrow(() -> new RuntimeException("Task not found: " + dto.id()));
+
+            task.setTitle(dto.title());
+            task.setPosition(dto.position());
+            task.setCompleted(dto.completed());
+            taskRepository.save(task);
+        }
     }
 }

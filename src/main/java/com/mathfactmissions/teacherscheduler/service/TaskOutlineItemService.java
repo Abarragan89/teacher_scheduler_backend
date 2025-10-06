@@ -1,12 +1,15 @@
 package com.mathfactmissions.teacherscheduler.service;
 
+import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.request.OutlineItemPositionUpdateDTO;
 import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.response.TaskOutlineResponse;
 import com.mathfactmissions.teacherscheduler.model.Task;
 import com.mathfactmissions.teacherscheduler.model.TaskOutlineItem;
 import com.mathfactmissions.teacherscheduler.repository.TaskOutlineItemRepository;
 import com.mathfactmissions.teacherscheduler.repository.TaskRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -71,5 +74,20 @@ public class TaskOutlineItemService {
 
     public void deleteTaskItem(UUID itemId) {
         taskOutlineItemRepository.deleteById(itemId);
+    }
+
+    @Transactional
+    public void batchUpdateOutlineItemPositions(List<OutlineItemPositionUpdateDTO> itemUpdates) {
+        for (OutlineItemPositionUpdateDTO dto : itemUpdates) {
+            TaskOutlineItem item = taskOutlineItemRepository.findById(dto.id())
+                    .orElseThrow(() -> new RuntimeException("Outline item not found: " + dto.id()));
+
+            item.setText(dto.text());
+            item.setPosition(dto.position());
+            item.setIndentLevel(dto.indentLevel());
+            item.setCompleted(dto.completed());
+
+            taskOutlineItemRepository.save(item);
+        }
     }
 }
