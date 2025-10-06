@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface DayRepository extends JpaRepository<Day, UUID> {
 
-    @EntityGraph(attributePaths = {"schedules", "schedules.tasks", "schedules.tasks.outlineItems"})
+    @EntityGraph(attributePaths = {"schedule", "schedule.tasks", "schedule.tasks.outlineItems"})
     Optional<Day> findByUser_IdAndDayDate(UUID userId, LocalDate dayDate);
 
 

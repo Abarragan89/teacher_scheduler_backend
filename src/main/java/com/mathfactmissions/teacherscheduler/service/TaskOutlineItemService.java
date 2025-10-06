@@ -46,12 +46,27 @@ public class TaskOutlineItemService {
         TaskOutlineItem savedItem = taskOutlineItemRepository.save(newItem);
 
         // Map to DTO
-        return TaskOutlineResponse.builder()
-                .id(savedItem.getId())
-                .position(savedItem.getPosition())
-                .indentLevel(savedItem.getIndentLevel())
-                .text(savedItem.getText())
-                .completed(savedItem.getCompleted())
-                .build();
+        return TaskOutlineResponse.fromEntity(savedItem);
+    }
+
+    public TaskOutlineResponse updateTaskOutlineItem(
+            UUID id,
+            String text,
+            Boolean completed,
+            Integer indentLevel,
+            Integer position
+    ) {
+        TaskOutlineItem outlineItem = taskOutlineItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Outline Task Not found"));
+
+        outlineItem.setText(text);
+        outlineItem.setCompleted(completed);
+        outlineItem.setIndentLevel(indentLevel);
+        outlineItem.setPosition(position);
+
+        TaskOutlineItem updatedOutlineItem = taskOutlineItemRepository.save(outlineItem);
+
+        return TaskOutlineResponse.fromEntity(updatedOutlineItem);
+
     }
 }

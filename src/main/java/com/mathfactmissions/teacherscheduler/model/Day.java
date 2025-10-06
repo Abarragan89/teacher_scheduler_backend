@@ -33,8 +33,8 @@ public class Day {
     @Column(name = "day_date", nullable = false)
     private LocalDate dayDate;
 
-    @OneToMany(mappedBy = "day", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<Schedule> schedules = new HashSet<>();
+    @OneToOne(mappedBy = "day", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Schedule schedule;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

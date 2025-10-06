@@ -20,7 +20,7 @@ public class Schedule {
     private UUID id;
 
     @Setter
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "day_id", nullable = false)
     private Day day;
 

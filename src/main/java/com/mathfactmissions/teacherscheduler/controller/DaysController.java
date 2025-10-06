@@ -25,12 +25,6 @@ public class DaysController {
     }
 
 
-//    @GetMapping("/get-all-days")
-//    public ResponseEntity<List<DayResponse>> getAllDays() {
-//        List<DayResponse>  days = dayService.findAllDays();
-//        return ResponseEntity.ok(days);
-//    }
-
     @PostMapping("/find-or-create")
     public ResponseEntity<DayResponse> findOrCreateDay(@RequestBody @Valid DayRequest request) {
 

@@ -1,5 +1,6 @@
 package com.mathfactmissions.teacherscheduler.service;
 
+import com.mathfactmissions.teacherscheduler.dto.task.response.TaskBasicResponse;
 import com.mathfactmissions.teacherscheduler.dto.task.response.TaskResponse;
 import com.mathfactmissions.teacherscheduler.model.Schedule;
 import com.mathfactmissions.teacherscheduler.model.Task;
@@ -48,4 +49,22 @@ public class TaskService {
                 .build();
     }
 
+    public TaskBasicResponse updateTask(
+            UUID id,
+            String title,
+            Integer position,
+            Boolean completed
+    ) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        task.setTitle(title);
+        task.setPosition(position);
+        task.setCompleted(completed);
+
+        // You don't have to call save() if the entity is still managed, but it’s fine to be explicit
+        Task updated = taskRepository.save(task);
+
+        return TaskBasicResponse.fromEntity(updated);
+    }
 }

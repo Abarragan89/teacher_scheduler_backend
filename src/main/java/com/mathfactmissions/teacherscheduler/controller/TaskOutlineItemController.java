@@ -2,14 +2,12 @@ package com.mathfactmissions.teacherscheduler.controller;
 
 
 import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.request.TaskOutlineRequest;
+import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.request.UpdateTaskOutlineItemRequest;
 import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.response.TaskOutlineResponse;
 import com.mathfactmissions.teacherscheduler.model.TaskOutlineItem;
 import com.mathfactmissions.teacherscheduler.service.TaskOutlineItemService;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("task-outline-item")
@@ -32,6 +30,22 @@ public class TaskOutlineItemController {
                     request.indentLevel(),
                     request.text()
             );
-
     }
+
+    @PutMapping("update-item")
+    public TaskOutlineResponse updateTaskOutlineItem(
+            @Valid
+            @RequestBody
+            UpdateTaskOutlineItemRequest
+            request
+    ){
+        return taskOutlineItemService.updateTaskOutlineItem(
+                request.id(),
+                request.text(),
+                request.completed(),
+                request.indent_level(),
+                request.position()
+        );
+    }
+
 }
