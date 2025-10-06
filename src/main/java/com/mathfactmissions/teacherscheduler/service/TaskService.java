@@ -67,4 +67,8 @@ public class TaskService {
 
         return TaskBasicResponse.fromEntity(updated);
     }
+
+    public void deleteTask(UUID taskId) {
+        taskRepository.deleteById(taskId);
+    }
 }

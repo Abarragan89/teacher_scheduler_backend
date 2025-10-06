@@ -7,7 +7,10 @@ import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.response.TaskOu
 import com.mathfactmissions.teacherscheduler.model.TaskOutlineItem;
 import com.mathfactmissions.teacherscheduler.service.TaskOutlineItemService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("task-outline-item")
@@ -46,6 +49,13 @@ public class TaskOutlineItemController {
                 request.indent_level(),
                 request.position()
         );
+    }
+
+    @DeleteMapping("/delete/{itemId}")
+    public ResponseEntity<Void> deleteTaskOutlineItem(@PathVariable UUID itemId) {
+        taskOutlineItemService.deleteTaskItem(itemId);
+
+        return ResponseEntity.noContent().build();
     }
 
 }

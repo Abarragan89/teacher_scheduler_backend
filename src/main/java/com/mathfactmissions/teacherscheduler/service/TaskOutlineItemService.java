@@ -67,6 +67,9 @@ public class TaskOutlineItemService {
         TaskOutlineItem updatedOutlineItem = taskOutlineItemRepository.save(outlineItem);
 
         return TaskOutlineResponse.fromEntity(updatedOutlineItem);
+    }
 
+    public void deleteTaskItem(UUID itemId) {
+        taskOutlineItemRepository.deleteById(itemId);
     }
 }

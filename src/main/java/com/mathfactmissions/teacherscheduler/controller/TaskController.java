@@ -7,8 +7,11 @@ import com.mathfactmissions.teacherscheduler.dto.task.response.TaskResponse;
 import com.mathfactmissions.teacherscheduler.model.Task;
 import com.mathfactmissions.teacherscheduler.service.TaskService;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/task")
@@ -37,5 +40,11 @@ public class TaskController {
                 .updateTask(request.id(), request.title(), request.position(), request.completed());
         return ResponseEntity.ok(updatedTask);
 
+    }
+
+    @DeleteMapping("delete/{taskId}")
+    public ResponseEntity<Void> deleteTask(@PathVariable UUID taskId) {
+            taskService.deleteTask(taskId);
+        return ResponseEntity.noContent().build();
     }
 }

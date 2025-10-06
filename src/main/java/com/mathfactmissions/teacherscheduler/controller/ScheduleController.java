@@ -19,10 +19,4 @@ public class ScheduleController {
         this.scheduleService = scheduleService;
     }
 
-//    @GetMapping("/{scheduleId}")
-//    public ScheduleResponse getScheduleWithTasks(@PathVariable UUID scheduleId) {
-//        return scheduleService.findScheduleAndTasks(scheduleId);
-//
-//    }
-
 }

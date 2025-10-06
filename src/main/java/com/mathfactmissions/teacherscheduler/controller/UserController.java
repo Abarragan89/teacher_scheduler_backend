@@ -19,9 +19,4 @@ public class UserController {
     }
 
 
-    @GetMapping("/allUsers")
-    public List<User> getAllUsers() {
-        return userService.findAll();
-    }
-
 }
