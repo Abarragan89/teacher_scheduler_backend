@@ -83,7 +83,7 @@ public class AuthController {
         // Cookies
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                 .httpOnly(true)
-                .secure(true)
+//                .secure(true)
                 .sameSite("None")
                 .path("/")
                 .maxAge(900) // 15 min
@@ -91,7 +91,7 @@ public class AuthController {
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(true)
-                .secure(true)
+//                .secure(true)
                 .sameSite("None")
                 .path("/")
                 .maxAge(2592000) // 30 days
