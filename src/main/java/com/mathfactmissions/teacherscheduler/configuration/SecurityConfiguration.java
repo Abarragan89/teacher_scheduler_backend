@@ -37,30 +37,41 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 //        This makes the shorter token the correct version to check from frontend to backend
-        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+//        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         // Set the attribute name to null to force token generation on all requests
-        requestHandler.setCsrfRequestAttributeName(null);
+//        requestHandler.setCsrfRequestAttributeName(null);
 
-        CookieCsrfTokenRepository tokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
-        tokenRepository.setCookieCustomizer(builder -> builder
-                .sameSite("None")              // allow cross-site usage
-                .secure(true)                  // must be Secure when SameSite=None (HTTPS required)
-                .httpOnly(false)                // readable by JS (so frontend can read XSRF-TOKEN cookie)
-                .path("/")                     // global path
-        );
+//        CookieCsrfTokenRepository tokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+//        tokenRepository.setCookieCustomizer(builder -> builder
+//                .sameSite("None")              // allow cross-site usage
+//                .secure(true)                  // must be Secure when SameSite=None (HTTPS required)
+//                .httpOnly(false)                // readable by JS (so frontend can read XSRF-TOKEN cookie)
+//                .path("/")                     // global path
+//        );
 
 
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf
-                    .csrfTokenRepository(tokenRepository)
-                    .ignoringRequestMatchers(
-                            "/auth/magic-link-request",
-                            "/auth/magic-link-verify",
-                            "/auth/logout",
-                            "/auth/refresh")
-                    .csrfTokenRequestHandler(requestHandler)
-            )
+//            .csrf(csrf -> csrf
+//                    .csrfTokenRepository(tokenRepository)
+//                    .ignoringRequestMatchers(
+//                            "/auth/magic-link-request",
+//                            "/auth/magic-link-verify",
+//                            "/auth/logout",
+//                            "/auth/refresh")
+//                    .csrfTokenRequestHandler(requestHandler)
+//            )
+
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Example: Use HttpOnlyFalse for client-side access
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()) // For modern Spring Security
+                        .ignoringRequestMatchers(
+                                "/auth/magic-link-request",
+                                "/auth/magic-link-verify",
+                                "/auth/logout",
+                                "/auth/refresh"
+                        )
+                )
             .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
