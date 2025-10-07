@@ -18,8 +18,6 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-
 import java.util.List;
 
 
@@ -146,7 +144,7 @@ public class SecurityConfiguration {
         requestHandler.setCsrfRequestAttributeName(null);
 
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+//                .cors(cors -> cors.configurationSource(corsFilter()))
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfTokenRepository()) // Use the custom token repository
                         .ignoringRequestMatchers(
