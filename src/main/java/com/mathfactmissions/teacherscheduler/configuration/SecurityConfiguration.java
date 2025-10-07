@@ -45,7 +45,8 @@ public class SecurityConfiguration {
         tokenRepository.setCookieCustomizer(builder -> builder
                 .sameSite("None")              // allow cross-site usage
                 .secure(true)                  // must be Secure when SameSite=None (HTTPS required)
-                .httpOnly(false)               // readable by JS (so frontend can read XSRF-TOKEN cookie)
+                .httpOnly(false)
+                .domain(".teachforfree.com") // readable by JS (so frontend can read XSRF-TOKEN cookie)
                 .path("/")                     // global path
         );
 
@@ -89,7 +90,7 @@ public class SecurityConfiguration {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(List.of("Set-Cookie", "XSRF-TOKEN"));
+        configuration.setExposedHeaders(List.of("Set-Cookie"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
