@@ -44,19 +44,10 @@ public class SecurityConfiguration {
         // Set the attribute name to null to force token generation on all requests
         requestHandler.setCsrfRequestAttributeName(null);
 
-        CookieCsrfTokenRepository tokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
-        tokenRepository.setCookieCustomizer(builder -> builder
-                .sameSite("None")              // allow cross-site usage
-                .secure(true)                  // must be Secure when SameSite=None (HTTPS required)
-                .httpOnly(false)                // readable by JS (so frontend can read XSRF-TOKEN cookie)
-                .path("/")                     // global path
-        );
-
-
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf
-                    .csrfTokenRepository(tokenRepository)
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     .ignoringRequestMatchers(
                             "/auth/magic-link-request",
                             "/auth/magic-link-verify",
