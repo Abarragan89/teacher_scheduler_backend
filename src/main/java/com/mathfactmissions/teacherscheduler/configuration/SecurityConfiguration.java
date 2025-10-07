@@ -46,7 +46,6 @@ public class SecurityConfiguration {
                 .sameSite("None")              // allow cross-site usage
                 .secure(true)                  // must be Secure when SameSite=None (HTTPS required)
                 .httpOnly(false)               // readable by JS (so frontend can read XSRF-TOKEN cookie)
-                .domain(".teachforfree.com")   // share across subdomains (use your parent domain)
                 .path("/")                     // global path
         );
 
