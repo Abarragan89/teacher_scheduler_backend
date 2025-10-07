@@ -45,40 +45,39 @@ public class SecurityConfiguration {
         tokenRepository.setCookieCustomizer(builder -> builder
                 .sameSite("None")              // allow cross-site usage
                 .secure(true)                  // must be Secure when SameSite=None (HTTPS required)
-                .httpOnly(false)
-                .domain(".teachforfree.com") // readable by JS (so frontend can read XSRF-TOKEN cookie)
+                .httpOnly(false)                // readable by JS (so frontend can read XSRF-TOKEN cookie)
                 .path("/")                     // global path
         );
 
 
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(tokenRepository)
-                        .ignoringRequestMatchers(
-                                "/auth/magic-link-request",
-                                "/auth/magic-link-verify",
-                                "/auth/logout",
-                                "/auth/refresh")
-                        .csrfTokenRequestHandler(requestHandler)
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/auth/magic-link-request",
-                                "/auth/magic-link-verify",
-                                "/auth/logout",
-                                "/auth/refresh"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex -> ex
-                    .authenticationEntryPoint((request, response, authException) -> {
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    })
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf
+                    .csrfTokenRepository(tokenRepository)
+                    .ignoringRequestMatchers(
+                            "/auth/magic-link-request",
+                            "/auth/magic-link-verify",
+                            "/auth/logout",
+                            "/auth/refresh")
+                    .csrfTokenRequestHandler(requestHandler)
+            )
+            .sessionManagement(session -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(
+                            "/auth/magic-link-request",
+                            "/auth/magic-link-verify",
+                            "/auth/logout",
+                            "/auth/refresh"
+                    ).permitAll()
+                    .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                })
         );
         return http.build();
     }
