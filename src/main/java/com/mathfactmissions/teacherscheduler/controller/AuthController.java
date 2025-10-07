@@ -191,9 +191,6 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
-        // If you’re storing refresh tokens in DB/Redis, also delete it there
-        // refreshTokenService.invalidateUserTokens(userId);
-
         return ResponseEntity.ok("Logged out successfully");
     }
 }

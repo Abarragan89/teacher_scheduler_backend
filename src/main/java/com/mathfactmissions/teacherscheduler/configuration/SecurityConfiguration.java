@@ -41,10 +41,20 @@ public class SecurityConfiguration {
         // Set the attribute name to null to force token generation on all requests
         requestHandler.setCsrfRequestAttributeName(null);
 
+        CookieCsrfTokenRepository tokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        tokenRepository.setCookieCustomizer(builder -> builder
+                .sameSite("None")              // allow cross-site usage
+                .secure(true)                  // must be Secure when SameSite=None (HTTPS required)
+                .httpOnly(false)               // readable by JS (so frontend can read XSRF-TOKEN cookie)
+                .domain(".teachforfree.com")   // share across subdomains (use your parent domain)
+                .path("/")                     // global path
+        );
+
+
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRepository(tokenRepository)
                         .ignoringRequestMatchers(
                                 "/auth/magic-link-request",
                                 "/auth/magic-link-verify",
@@ -80,7 +90,7 @@ public class SecurityConfiguration {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(List.of("Set-Cookie"));
+        configuration.setExposedHeaders(List.of("Set-Cookie", "XSRF-TOKEN"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
