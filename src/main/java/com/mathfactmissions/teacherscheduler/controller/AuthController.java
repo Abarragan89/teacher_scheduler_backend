@@ -83,7 +83,7 @@ public class AuthController {
         // Cookies
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
                 .httpOnly(true)
-//                .secure(true)
+                .secure(true)
                 .sameSite("None")
                 .path("/")
                 .maxAge(900) // 15 min
@@ -91,7 +91,7 @@ public class AuthController {
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(true)
-//                .secure(true)
+                .secure(true)
                 .sameSite("None")
                 .path("/")
                 .maxAge(2592000) // 30 days
@@ -144,7 +144,6 @@ public class AuthController {
     public ResponseEntity<?> verifySession(
             @CookieValue(name="access_token", required = false) String accessToken
     ) {
-        System.out.println("ACEESS TOKEN IN SESSIoN " + accessToken);
        if (accessToken == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("authenticated", false));

@@ -42,8 +42,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     java.util.Arrays.stream(cookies)
                             .filter(c -> "access_token".equals(c.getName()))
                             .findFirst();
-
-            System.out.println("access token in jwtFilter" + accessTokenCookie);
             if (accessTokenCookie.isPresent()) {
                 try {
 
