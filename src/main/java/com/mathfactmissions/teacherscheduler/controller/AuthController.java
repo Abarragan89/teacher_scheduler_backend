@@ -82,6 +82,7 @@ public class AuthController {
 
         // Cookies
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
+                .domain("teachforfree.com")
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
@@ -90,6 +91,7 @@ public class AuthController {
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
+                .domain("teachforfree.com")
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
@@ -127,6 +129,7 @@ public class AuthController {
         String newAccessToken = jwtService.generateToken(email, accessClaims, 15);
 
         ResponseCookie newAccessCookie = ResponseCookie.from("access_token", newAccessToken)
+                .domain("teachforfree.com")
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
@@ -169,6 +172,7 @@ public class AuthController {
     public ResponseEntity<?> logoutUser(HttpServletResponse response) {
         // Clear access token cookie
         ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", "")
+                .domain("teachforfree.com")
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
@@ -177,6 +181,7 @@ public class AuthController {
 
         // Clear refresh token cookie
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", "")
+                .domain("teachforfree.com")
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
