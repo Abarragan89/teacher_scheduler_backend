@@ -2,6 +2,7 @@ package com.mathfactmissions.teacherscheduler.service;
 
 import com.mathfactmissions.teacherscheduler.model.PushSubscription;
 import com.mathfactmissions.teacherscheduler.repository.PushSubscriptionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,8 +32,18 @@ public class PushSubscriptionService {
         return pushSubscriptionRepository.save(subscription);
     }
 
+    @Transactional
     public void removeSubscription(String endpoint) {
-        pushSubscriptionRepository.deleteByEndpoint(endpoint);
+        System.out.println("in the delete" + endpoint);
+//        pushSubscriptionRepository.deleteByEndpoint(endpoint);
+
+        Optional<PushSubscription> subscription = pushSubscriptionRepository.findByEndpoint(endpoint);
+        if (subscription.isPresent()) {
+            pushSubscriptionRepository.delete(subscription.get());
+            System.out.println("✅ Successfully deleted subscription ID: " + subscription.get().getId());
+        } else {
+            System.out.println("❌ No subscription found with endpoint");
+        }
     }
 
     public List<PushSubscription> getAllSubscriptions() {

@@ -2,6 +2,7 @@ package com.mathfactmissions.teacherscheduler.repository;
 
 import com.mathfactmissions.teacherscheduler.model.PushSubscription;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public interface PushSubscriptionRepository extends JpaRepository<PushSubscripti
             ;
     Optional<PushSubscription> findByEndpoint(String endpoint);
 
+    @Modifying
     void deleteByEndpoint(String endpoint);
 
     List<PushSubscription> findAll(); // Get all subscriptions for broadcast
