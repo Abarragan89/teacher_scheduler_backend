@@ -1,29 +1,38 @@
 package com.mathfactmissions.teacherscheduler.service;
 
+import com.mathfactmissions.teacherscheduler.dto.day.response.DayResponse;
 import com.mathfactmissions.teacherscheduler.dto.task.request.TaskPositionUpdateDTO;
 import com.mathfactmissions.teacherscheduler.dto.task.response.TaskBasicResponse;
 import com.mathfactmissions.teacherscheduler.dto.task.response.TaskResponse;
+import com.mathfactmissions.teacherscheduler.model.Day;
 import com.mathfactmissions.teacherscheduler.model.Schedule;
 import com.mathfactmissions.teacherscheduler.model.Task;
+import com.mathfactmissions.teacherscheduler.model.TaskOutlineItem;
 import com.mathfactmissions.teacherscheduler.repository.TaskRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
 
     private final TaskRepository taskRepository;
     private final ScheduleService scheduleService;
+    private final DayService dayService;
 
     public TaskService(
             TaskRepository taskRepository,
-            ScheduleService scheduleService
+            ScheduleService scheduleService,
+            DayService dayService
     ) {
         this.taskRepository = taskRepository;
         this.scheduleService = scheduleService;
+        this.dayService = dayService;
     }
 
     public Task findById(UUID id) {
@@ -86,5 +95,52 @@ public class TaskService {
             task.setCompleted(dto.completed());
             taskRepository.save(task);
         }
+    }
+
+    public void moveTaskToAnotherDate(UUID userId, UUID taskId, LocalDate newDate) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("task not found"));
+        
+
+         DayResponse day = dayService.createOrFindDay(userId, newDate);
+
+         Schedule schedule = scheduleService.findById(day.schedule().id());
+
+
+//          List<TaskOutlineItem> copiedItems = task.getOutlineItems().stream()
+//              .map(item -> {
+//                  TaskOutlineItem newItem = new TaskOutlineItem();
+//                  newItem.setContent(item.getContent());
+//                  newItem.setPosition(item.getPosition());
+//                  newItem.setCompleted(item.isCompleted());
+//                  newItem.setTask(newTask); // attach to the *new* task
+//                  return newItem;
+//              })
+//              .collect(Collectors.toList());
+//
+//          newTask.setOutlineItems(copiedItems);
+
+
+        Task newTask = new Task();
+        newTask.setCompleted(false);
+        newTask.setTitle(task.getTitle());
+        newTask.setPosition(task.getPosition());
+
+        Set<TaskOutlineItem> copiedItems = task.getOutlineItems().stream()
+                .map(item -> {
+                    TaskOutlineItem newItem = new TaskOutlineItem();
+                    newItem.setText(item.getText());
+                    newItem.setPosition(item.getPosition());
+                    newItem.setCompleted(false);
+                    newItem.setIndentLevel(item.getIndentLevel());
+                    newItem.setTask(newTask); // attach to the *new* task
+                    return newItem;
+                })
+                .collect(Collectors.toSet());
+
+        newTask.setOutlineItems(copiedItems);
+        newTask.setSchedule(schedule);
+
+        taskRepository.save(newTask);
     }
 }

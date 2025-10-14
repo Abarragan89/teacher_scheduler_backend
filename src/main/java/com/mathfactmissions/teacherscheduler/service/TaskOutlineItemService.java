@@ -62,6 +62,8 @@ public class TaskOutlineItemService {
         TaskOutlineItem outlineItem = taskOutlineItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Outline Task Not found"));
 
+        System.out.println("indent lvevl in the update atsk outoline" + indentLevel);
+
         outlineItem.setText(text);
         outlineItem.setCompleted(completed);
         outlineItem.setIndentLevel(indentLevel);

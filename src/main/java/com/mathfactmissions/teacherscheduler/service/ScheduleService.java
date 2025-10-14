@@ -1,15 +1,11 @@
 package com.mathfactmissions.teacherscheduler.service;
 
-import com.mathfactmissions.teacherscheduler.dto.schedule.response.ScheduleResponse;
-import com.mathfactmissions.teacherscheduler.dto.task.response.TaskResponse;
 import com.mathfactmissions.teacherscheduler.model.Day;
 import com.mathfactmissions.teacherscheduler.model.Schedule;
 import com.mathfactmissions.teacherscheduler.repository.ScheduleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Service

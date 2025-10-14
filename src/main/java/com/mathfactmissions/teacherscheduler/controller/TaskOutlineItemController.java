@@ -44,11 +44,12 @@ public class TaskOutlineItemController {
             UpdateTaskOutlineItemRequest
             request
     ){
+
         return taskOutlineItemService.updateTaskOutlineItem(
                 request.id(),
                 request.text(),
                 request.completed(),
-                request.indent_level(),
+                request.indentLevel(),
                 request.position()
         );
     }

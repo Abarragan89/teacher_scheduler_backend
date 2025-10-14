@@ -11,7 +11,7 @@ public record UpdateTaskOutlineItemRequest(
         UUID id,
         String text,
         Boolean completed,
-        Integer indent_level,
+        Integer indentLevel,
         Integer position
 ) {
 }
