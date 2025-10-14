@@ -15,11 +15,11 @@ public record TaskOutlineResponse(
 
     public static TaskOutlineResponse fromEntity(TaskOutlineItem item) {
         return TaskOutlineResponse.builder()
-                .id(item.getId())
-                .text(item.getText())
-                .completed(item.getCompleted())
-                .indentLevel(item.getIndentLevel())
-                .position(item.getPosition())
-                .build();
+            .id(item.getId())
+            .text(item.getText())
+            .completed(item.getCompleted())
+            .indentLevel(item.getIndentLevel())
+            .position(item.getPosition())
+            .build();
     }
 }

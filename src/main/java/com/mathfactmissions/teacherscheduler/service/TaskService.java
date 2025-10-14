@@ -106,21 +106,6 @@ public class TaskService {
 
          Schedule schedule = scheduleService.findById(day.schedule().id());
 
-
-//          List<TaskOutlineItem> copiedItems = task.getOutlineItems().stream()
-//              .map(item -> {
-//                  TaskOutlineItem newItem = new TaskOutlineItem();
-//                  newItem.setContent(item.getContent());
-//                  newItem.setPosition(item.getPosition());
-//                  newItem.setCompleted(item.isCompleted());
-//                  newItem.setTask(newTask); // attach to the *new* task
-//                  return newItem;
-//              })
-//              .collect(Collectors.toList());
-//
-//          newTask.setOutlineItems(copiedItems);
-
-
         Task newTask = new Task();
         newTask.setCompleted(false);
         newTask.setTitle(task.getTitle());
