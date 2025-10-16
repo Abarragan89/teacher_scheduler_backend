@@ -2,6 +2,7 @@ package com.mathfactmissions.teacherscheduler.controller;
 
 import com.mathfactmissions.teacherscheduler.dto.day.request.DayRequest;
 import com.mathfactmissions.teacherscheduler.dto.day.response.DayResponse;
+import com.mathfactmissions.teacherscheduler.dto.schedule.request.MoveScheduleRequest;
 import com.mathfactmissions.teacherscheduler.security.UserPrincipal;
 import com.mathfactmissions.teacherscheduler.service.DayService;
 import jakarta.validation.Valid;
@@ -38,6 +39,19 @@ public class DaysController {
         // Call the service to find or create the day
         DayResponse day = dayService.createOrFindDay(userId, request.dayDate());
         return ResponseEntity.ok(day);
+    }
+
+    @PostMapping("/move-schedule-to-date")
+    public ResponseEntity<Boolean> moveScheduleToDate(@RequestBody @Valid MoveScheduleRequest request) {
+        // Get the currently authenticated user ID
+        UserPrincipal userInfo = (UserPrincipal) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        UUID userId = userInfo.getId();
+
+        dayService.createOrFindDayWithSchedule(userId, request.dayDate(), request.scheduleId());
+        return ResponseEntity.ok(true);
     }
 
 }
