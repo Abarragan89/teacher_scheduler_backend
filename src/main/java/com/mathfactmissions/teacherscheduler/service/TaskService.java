@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -100,10 +101,8 @@ public class TaskService {
     public void moveTaskToAnotherDate(UUID userId, UUID taskId, LocalDate newDate) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("task not found"));
-        
 
          DayResponse day = dayService.createOrFindDay(userId, newDate);
-
          Schedule schedule = scheduleService.findById(day.schedule().id());
 
         Task newTask = new Task();
@@ -127,5 +126,17 @@ public class TaskService {
         newTask.setSchedule(schedule);
 
         taskRepository.save(newTask);
+    }
+
+    public TaskResponse updateTaskTime(UUID taskId, LocalTime startTime, LocalTime endTime) {
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("No task found"));
+
+        task.setStartTime(startTime);
+        task.setEndTime(endTime);
+        taskRepository.save(task);
+
+        return TaskResponse.fromEntity(task);
     }
 }

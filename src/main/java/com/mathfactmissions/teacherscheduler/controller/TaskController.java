@@ -46,7 +46,7 @@ public class TaskController {
     }
 
     @PutMapping("/batch-update-positions")
-    public ResponseEntity<?> batchUpdateTaskPositions(@RequestBody BatchTaskPositionUpdateRequest request) {
+    public ResponseEntity<?> batchUpdateTaskPositions(@RequestBody @Valid BatchTaskPositionUpdateRequest request) {
         try {
             List<TaskPositionUpdateDTO> tasks = request.tasks();
             taskService.batchUpdateTaskPositions(tasks);
@@ -68,7 +68,7 @@ public class TaskController {
     }
 
     @PostMapping("/move-to-later-date")
-    public ResponseEntity<Void> moveTaskToLaterDate(@RequestBody MoveTaskToLaterDate request) {
+    public ResponseEntity<Void> moveTaskToLaterDate(@RequestBody @Valid MoveTaskToLaterDate request) {
 
 
         // Get the currently authenticated user ID
@@ -84,5 +84,21 @@ public class TaskController {
                 request.newDate()
         );
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/update-task-times")
+    public ResponseEntity<TaskResponse> updateTaskTimes(
+            @RequestBody
+            @Valid
+            UpdateTaskTimeRequest
+            request
+    ) {
+        TaskResponse task = taskService.updateTaskTime(
+                request.taskId(),
+                request.startTime(),
+                request.endTime()
+        );
+
+        return ResponseEntity.ok(task);
     }
 }

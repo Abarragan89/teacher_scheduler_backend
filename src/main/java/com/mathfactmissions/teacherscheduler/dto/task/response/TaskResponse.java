@@ -4,6 +4,7 @@ import com.mathfactmissions.teacherscheduler.dto.taskOutlineItem.response.TaskOu
 import com.mathfactmissions.teacherscheduler.model.Task;
 import lombok.Builder;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -14,6 +15,8 @@ public record TaskResponse(
         Integer position,
         UUID id,
         Boolean completed,
+        LocalTime startTime,
+        LocalTime endTime,
         List<TaskOutlineResponse> outlineItems
 ) {
 
@@ -23,6 +26,8 @@ public record TaskResponse(
                 .title(task.getTitle())
                 .position(task.getPosition())
                 .completed(task.getCompleted())
+                .startTime(task.getStartTime())
+                .endTime(task.getEndTime())
                 .outlineItems(
                         task.getOutlineItems() == null ? List.of() :
                                 task.getOutlineItems().stream()

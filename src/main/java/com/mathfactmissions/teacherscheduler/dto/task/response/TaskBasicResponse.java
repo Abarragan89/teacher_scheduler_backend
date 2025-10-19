@@ -1,6 +1,8 @@
 package com.mathfactmissions.teacherscheduler.dto.task.response;
 
 import com.mathfactmissions.teacherscheduler.model.Task;
+
+import java.time.LocalTime;
 import java.util.UUID;
 import lombok.Builder;
 
@@ -9,7 +11,9 @@ public record TaskBasicResponse(
         UUID id,
         String title,
         Integer position,
-        Boolean completed
+        Boolean completed,
+        LocalTime startTime,
+        LocalTime endTime
 ) {
     public static TaskBasicResponse fromEntity(Task task) {
         return TaskBasicResponse.builder()
@@ -17,6 +21,8 @@ public record TaskBasicResponse(
                 .title(task.getTitle())
                 .position(task.getPosition())
                 .completed(task.getCompleted())
+                .startTime(task.getStartTime())
+                .endTime(task.getEndTime())
                 .build();
     }
 }
