@@ -29,6 +29,12 @@ public class DayService {
         this.scheduleService = scheduleService;
     }
 
+    public DayResponse findSingleDay(UUID dayId){
+        Day day = dayRepository.findById(dayId)
+                .orElseThrow(() -> new RuntimeException("No Day found"));
+        return DayResponse.fromEntity(day);
+    }
+
     @Transactional
     public DayResponse createOrFindDay(UUID userId, LocalDate dayDate) {
         return dayRepository.findByUser_IdAndDayDate(userId, dayDate)

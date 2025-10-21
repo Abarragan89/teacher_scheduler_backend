@@ -3,9 +3,11 @@ package com.mathfactmissions.teacherscheduler.controller;
 import com.mathfactmissions.teacherscheduler.dto.day.request.DayRequest;
 import com.mathfactmissions.teacherscheduler.dto.day.response.DayResponse;
 import com.mathfactmissions.teacherscheduler.dto.schedule.request.MoveScheduleRequest;
+import com.mathfactmissions.teacherscheduler.model.Day;
 import com.mathfactmissions.teacherscheduler.security.UserPrincipal;
 import com.mathfactmissions.teacherscheduler.service.DayService;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +25,12 @@ public class DaysController {
     @Autowired
     public DaysController(DayService dayService) {
         this.dayService = dayService;
+    }
+
+    @GetMapping("/single-day/{dayId}")
+    public ResponseEntity<DayResponse> findDay(@PathVariable UUID dayId) {
+         DayResponse day =  dayService.findSingleDay(dayId);
+         return ResponseEntity.ok(day);
     }
 
 

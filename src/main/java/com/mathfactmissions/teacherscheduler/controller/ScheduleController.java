@@ -1,6 +1,7 @@
 package com.mathfactmissions.teacherscheduler.controller;
 
 import com.mathfactmissions.teacherscheduler.service.ScheduleService;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,5 +16,7 @@ public class ScheduleController {
     public ScheduleController(ScheduleService scheduleService) {
         this.scheduleService = scheduleService;
     }
+
+//    @GetMapping('')
 
 }
