@@ -8,9 +8,12 @@ import com.mathfactmissions.teacherscheduler.security.UserPrincipal;
 import com.mathfactmissions.teacherscheduler.service.TaskService;
 import jakarta.validation.Valid;
 import org.apache.coyote.Response;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -19,6 +22,9 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/task")
 public class TaskController {
+
+    @Value("${app.public-token}")
+    private String publicToken;
 
     private final TaskService taskService;
 
@@ -34,6 +40,18 @@ public class TaskController {
         TaskResponse newTask = taskService
                 .addTask(request.scheduleId(), request.title(), request.position());
         return ResponseEntity.ok(newTask);
+    }
+
+    @PutMapping("/toggle-complete")
+    public ResponseEntity<TaskBasicResponse> toggleComplete(
+            @RequestHeader(value = "X-Public-Token", required = true) String token,
+            @RequestBody @Valid UpdateTaskRequest request
+    ) {
+        if (token == null || !token.equals(publicToken)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid token");
+        }
+        TaskBasicResponse updatedTask = taskService.toggleComplete(request.id(), request.completed());
+        return ResponseEntity.ok(updatedTask);
     }
 
 

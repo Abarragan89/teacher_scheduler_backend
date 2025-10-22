@@ -52,6 +52,19 @@ public class TaskOutlineItemService {
         return TaskOutlineResponse.fromEntity(savedItem);
     }
 
+    public TaskOutlineResponse toggleComplete(
+            UUID id,
+            Boolean completed
+    ) {
+        TaskOutlineItem outlineItem = taskOutlineItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Outline Task Not found"));
+
+        outlineItem.setCompleted(completed);
+        TaskOutlineItem updatedOutlineItem = taskOutlineItemRepository.save(outlineItem);
+        return TaskOutlineResponse.fromEntity(updatedOutlineItem);
+    }
+
+
     public TaskOutlineResponse updateTaskOutlineItem(
             UUID id,
             String text,
@@ -71,7 +84,6 @@ public class TaskOutlineItemService {
 
         return TaskOutlineResponse.fromEntity(updatedOutlineItem);
     }
-
     public void deleteTaskItem(UUID itemId) {
         taskOutlineItemRepository.deleteById(itemId);
     }

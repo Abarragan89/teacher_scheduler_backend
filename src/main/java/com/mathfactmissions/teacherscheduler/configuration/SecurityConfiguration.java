@@ -52,7 +52,11 @@ public class SecurityConfiguration {
                             "/auth/magic-link-request",
                             "/auth/magic-link-verify",
                             "/auth/logout",
-                            "/auth/refresh")
+                            "/auth/refresh",
+                            "/days/single-day/**",
+                            "/task/toggle-complete",
+                            "task-outline-item/toggle-complete"
+                            )
                     .csrfTokenRequestHandler(requestHandler)
             )
             .sessionManagement(session -> session
@@ -63,7 +67,10 @@ public class SecurityConfiguration {
                             "/auth/magic-link-request",
                             "/auth/magic-link-verify",
                             "/auth/logout",
-                            "/auth/refresh"
+                            "/auth/refresh",
+                            "/days/single-day/**",
+                            "/task/toggle-complete",
+                            "task-outline-item/toggle-complete"
                     ).permitAll()
                     .anyRequest().authenticated()
             )

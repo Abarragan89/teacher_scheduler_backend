@@ -62,6 +62,21 @@ public class TaskService {
                 .build();
     }
 
+    public TaskBasicResponse toggleComplete(
+            UUID id,
+            Boolean completed
+    ) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        task.setCompleted(completed);
+
+        // You don't have to call save() if the entity is still managed, but it’s fine to be explicit
+        Task updated = taskRepository.save(task);
+        return TaskBasicResponse.fromEntity(updated);
+    }
+
+
     public TaskBasicResponse updateTask(
             UUID id,
             String title,

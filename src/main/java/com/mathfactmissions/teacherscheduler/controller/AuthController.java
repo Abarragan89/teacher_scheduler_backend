@@ -129,7 +129,6 @@ public class AuthController {
         String newAccessToken = jwtService.generateToken(email, accessClaims, 15);
 
         ResponseCookie newAccessCookie = ResponseCookie.from("access_token", newAccessToken)
-//                .domain("teachforfree.com")
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
