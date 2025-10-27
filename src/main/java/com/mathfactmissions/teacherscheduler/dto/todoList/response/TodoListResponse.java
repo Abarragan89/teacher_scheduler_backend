@@ -11,12 +11,14 @@ import java.util.stream.Collectors;
 public record TodoListResponse(
         UUID id,
         String listName,
+        Boolean isDefault,
         List<TodoResponse> todos
 ) {
     public static TodoListResponse fromEntity(TodoList list) {
         return TodoListResponse.builder()
             .listName(list.getListName())
             .id(list.getId())
+            .isDefault(list.getIsDefault())
             .todos(
                 list.getTodos() == null ? List.of() :
                     list.getTodos().stream()

@@ -9,5 +9,5 @@ import java.util.UUID;
 
 public interface TodoListRepository extends JpaRepository<TodoList, UUID> {
 
-    Optional<List<TodoList>> findAllByUser(User user);
+    Optional<List<TodoList>> findAllByUserOrderByUpdatedAtDesc(User user);
 }

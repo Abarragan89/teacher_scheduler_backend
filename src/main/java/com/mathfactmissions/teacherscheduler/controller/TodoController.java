@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/todo")
@@ -29,7 +31,6 @@ public class TodoController {
     @PutMapping("/update-list-item")
     public ResponseEntity<TodoResponse> updateListItem(@Valid @RequestBody UpdateTodoRequest request) {
 
-        System.out.println("todo id " + request.todoId());
         TodoResponse updatedTodo =  todoService.updateTodoItem(
                 request.todoId(),
                 request.todoText(),
@@ -38,6 +39,18 @@ public class TodoController {
         );
 
         return ResponseEntity.ok(updatedTodo);
+    }
+
+    @DeleteMapping("/delete-list-item/{todoId}")
+    public ResponseEntity<Void> deleteListItem(@PathVariable UUID todoId) {
+
+        boolean deleted = todoService.deleteListItem(todoId);
+
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 
 }

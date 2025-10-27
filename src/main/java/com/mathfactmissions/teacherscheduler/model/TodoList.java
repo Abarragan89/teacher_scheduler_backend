@@ -33,6 +33,10 @@ public class TodoList {
     @OrderBy("created_at DESC")
     private List<Todo> todos = new ArrayList<Todo>();
 
+    @Builder.Default
+    @Column(name = "is_default")
+    private Boolean isDefault = false;
+
     @Column(name = "list_name", nullable = false)
     private String listName;
 

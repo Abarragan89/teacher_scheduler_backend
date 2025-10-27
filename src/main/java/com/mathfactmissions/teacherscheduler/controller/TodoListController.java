@@ -7,6 +7,7 @@ import com.mathfactmissions.teacherscheduler.model.TodoList;
 import com.mathfactmissions.teacherscheduler.security.UserPrincipal;
 import com.mathfactmissions.teacherscheduler.service.TodoListService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,5 +56,28 @@ public class TodoListController {
     public TodoListResponse updateListTitle(@RequestBody @Valid UpdateTodoListTitleRequest request) {
         TodoList newList = todoListService.updateListTitle(request.todoListId(), request.listName());
         return TodoListResponse.fromEntity(newList);
+    }
+
+    @DeleteMapping("/delete-list/{todoListId}")
+    public ResponseEntity<Void> deleteListItem(@PathVariable UUID todoListId) {
+        boolean deleted = todoListService.deleteListItem(todoListId);
+
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build(); // 204 No Content
+    }
+
+    @PutMapping("/set-default-list/{todoListId}")
+    public ResponseEntity<Boolean> setDefaultList(@PathVariable UUID todoListId) {
+        UserPrincipal userInfo = (UserPrincipal) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        UUID userId = userInfo.getId();
+
+        Boolean defaultList = todoListService.setDefaultList(userId, todoListId);
+
+        return ResponseEntity.ok(defaultList);
     }
 }

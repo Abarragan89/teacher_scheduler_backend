@@ -6,6 +6,7 @@ import com.mathfactmissions.teacherscheduler.repository.TodoListRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -49,11 +50,35 @@ public class TodoListService {
         User user = userService.findById(userId)
                 .orElseThrow(() -> new RuntimeException("No user found"));
 
-        List<TodoList> todoLists = todoListRepository.findAllByUser(user)
+        List<TodoList> todoLists = todoListRepository.findAllByUserOrderByUpdatedAtDesc(user)
                 .orElseThrow(() -> new RuntimeException("no lists found"));
 
         return todoLists.stream().map(TodoListResponse::fromEntity).toList();
     }
 
+    public Boolean deleteListItem(UUID todoId) {
+        if (!todoListRepository.existsById(todoId)) {
+            return false; // nothing to delete
+        }
+
+        todoListRepository.deleteById(todoId);
+        return true;
+    }
+
+    public Boolean setDefaultList(UUID userId, UUID todoListId) {
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new RuntimeException("no user found"));
+
+        Optional<List<TodoList>> userLists = todoListRepository.findAllByUserOrderByUpdatedAtDesc(user);
+
+        todoListRepository.findAllByUserOrderByUpdatedAtDesc(user)
+            .ifPresent(lists ->
+                lists.forEach(todoList -> {
+                    todoList.setIsDefault(todoList.getId().equals(todoListId));
+                    todoListRepository.save(todoList);
+                })
+            );
+        return true;
+    }
 
 }

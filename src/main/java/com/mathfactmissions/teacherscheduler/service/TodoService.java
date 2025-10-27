@@ -45,8 +45,6 @@ public class TodoService {
             Integer priority
     ) {
 
-        System.out.println("todo text " + todoText);
-
         Todo currentTodo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new RuntimeException("no todo found"));
 
@@ -57,6 +55,15 @@ public class TodoService {
         todoRepository.save(currentTodo);
 
         return TodoResponse.fromEntity(currentTodo);
+    }
+
+    public boolean deleteListItem(UUID todoId) {
+        if (!todoRepository.existsById(todoId)) {
+            return false; // nothing to delete
+        }
+
+        todoRepository.deleteById(todoId);
+        return true;
     }
 
 
