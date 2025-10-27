@@ -3,6 +3,8 @@ package com.mathfactmissions.teacherscheduler.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.Instant;
 import java.util.*;
@@ -30,23 +32,13 @@ public class Schedule {
     @OrderBy("position ASC")
     private Set<Task> tasks = new HashSet<Task>();
 
-    @Column (name = "created_at", updatable = false)
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @Column(name = "updated_at")
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
-
-
-    @PrePersist
-    protected  void onCreate() {
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
-    }
-
-    @PreUpdate
-    protected  void onUpdate() {
-        this.updatedAt = Instant.now();
-    }
 
 
 }

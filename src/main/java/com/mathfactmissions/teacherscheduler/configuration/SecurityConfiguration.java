@@ -55,7 +55,7 @@ public class SecurityConfiguration {
                             "/auth/refresh",
                             "/days/single-day/**",
                             "/task/toggle-complete",
-                            "task-outline-item/toggle-complete"
+                            "/task-outline-item/toggle-complete"
                             )
                     .csrfTokenRequestHandler(requestHandler)
             )
@@ -70,7 +70,7 @@ public class SecurityConfiguration {
                             "/auth/refresh",
                             "/days/single-day/**",
                             "/task/toggle-complete",
-                            "task-outline-item/toggle-complete"
+                            "/task-outline-item/toggle-complete"
                     ).permitAll()
                     .anyRequest().authenticated()
             )

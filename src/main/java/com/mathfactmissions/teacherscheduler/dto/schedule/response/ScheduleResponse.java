@@ -15,13 +15,13 @@ public record ScheduleResponse(
 
     public static ScheduleResponse fromEntity(Schedule schedule) {
         return ScheduleResponse.builder()
-                .id(schedule.getId())
-                .tasks(
-                        schedule.getTasks() == null ? List.of() :
-                                schedule.getTasks().stream()
-                                        .map(TaskResponse::fromEntity)
-                                        .collect(Collectors.toList())
-                )
-                .build();
+            .id(schedule.getId())
+            .tasks(
+                schedule.getTasks() == null ? List.of() :
+                    schedule.getTasks().stream()
+                        .map(TaskResponse::fromEntity)
+                        .collect(Collectors.toList())
+            )
+            .build();
     }
 }
