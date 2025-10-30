@@ -7,6 +7,7 @@ import com.mathfactmissions.teacherscheduler.repository.TodoListRepository;
 import com.mathfactmissions.teacherscheduler.repository.TodoRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -42,7 +43,8 @@ public class TodoService {
             UUID todoId,
             String todoText,
             Boolean completed,
-            Integer priority
+            Integer priority,
+            Instant dueDate
     ) {
 
         Todo currentTodo = todoRepository.findById(todoId)
@@ -51,6 +53,15 @@ public class TodoService {
         currentTodo.setText(todoText);
         currentTodo.setCompleted(completed);
         currentTodo.setPriority(priority);
+        currentTodo.setDueDate(dueDate);
+
+        Instant oldDueDate = currentTodo.getDueDate();
+        if (dueDate != null && !dueDate.equals(oldDueDate)) {
+            currentTodo.setNotificationSent(false);
+            currentTodo.setNotificationSentAt(null);
+            currentTodo.setOverdueNotificationSent(false);
+            System.out.println("🔄 Due date updated for todo: " + todoId + " - notification flags reset");
+        }
 
         todoRepository.save(currentTodo);
 

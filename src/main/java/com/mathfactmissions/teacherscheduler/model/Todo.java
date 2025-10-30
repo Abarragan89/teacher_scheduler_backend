@@ -29,6 +29,10 @@ public class Todo {
     @JoinColumn(name = "todo_list_id", nullable = false)
     private TodoList todoList;
 
+    public UUID getUserId() {
+        return this.todoList != null ? this.todoList.getUserId() : null;
+    }
+
     @Column(columnDefinition = "TEXT", nullable = false)
     private String text;
 
@@ -37,10 +41,21 @@ public class Todo {
     private Integer priority = 1;
 
     @Column(name = "due_date")
-    private OffsetDateTime dueDate;
+    private Instant dueDate;
 
     @Column(nullable = false)
     private Boolean completed;
+
+    @Builder.Default
+    @Column(name = "notification_sent", nullable = false)
+    private boolean notificationSent = false;
+
+    @Column(name = "notification_sent_at")
+    private Instant notificationSentAt;
+
+    @Builder.Default
+    @Column(name = "overdue_notification_sent", nullable = false)
+    private boolean overdueNotificationSent = false;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)

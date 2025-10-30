@@ -28,6 +28,10 @@ public class TodoList {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    public UUID getUserId() {
+        return this.user != null ? this.user.getId() : null;
+    }
+
     @Builder.Default
     @OneToMany(mappedBy = "todoList", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("created_at DESC")

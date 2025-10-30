@@ -34,8 +34,6 @@ public class PushSubscriptionService {
 
     @Transactional
     public void removeSubscription(String endpoint) {
-        System.out.println("in the delete" + endpoint);
-//        pushSubscriptionRepository.deleteByEndpoint(endpoint);
 
         Optional<PushSubscription> subscription = pushSubscriptionRepository.findByEndpoint(endpoint);
         if (subscription.isPresent()) {

@@ -35,7 +35,8 @@ public class TodoController {
                 request.todoId(),
                 request.todoText(),
                 request.completed(),
-                request.priority()
+                request.priority(),
+                request.dueDate()
         );
 
         return ResponseEntity.ok(updatedTodo);

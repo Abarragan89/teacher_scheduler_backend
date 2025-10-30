@@ -2,7 +2,7 @@ package com.mathfactmissions.teacherscheduler.dto.todo.response;
 
 import com.mathfactmissions.teacherscheduler.model.Todo;
 import lombok.Builder;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Builder
@@ -10,7 +10,7 @@ public record TodoResponse(
         UUID id,
         String text,
         Integer priority,
-        OffsetDateTime dueDate,
+        Instant dueDate,
         Boolean completed
 ) {
     public static TodoResponse fromEntity(Todo todo) {
