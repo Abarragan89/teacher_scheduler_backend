@@ -6,8 +6,6 @@ import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.security.GeneralSecurityException;
 import java.time.format.DateTimeFormatter;
 import java.time.ZoneId;
 import java.util.List;
@@ -19,36 +17,18 @@ public class PushNotificationService {
     private final PushSubscriptionService pushSubscriptionService;
 
     public PushNotificationService(
-            @Value("${vapid.public.key:}") String vapidPublicKey,  // Added default empty string
+            @Value("${vapid.public.key:}") String vapidPublicKey,
             @Value("${vapid.private.key:}") String vapidPrivateKey,
-            @Value("${vapid.subject:mailto:test@test.com}") String vapidSubject,
+            @Value("${vapid.subject}") String vapidSubject,
             PushSubscriptionService pushSubscriptionService
     ) {
         this.pushSubscriptionService = pushSubscriptionService;
-
-        // Debug logging
-        System.out.println("=== VAPID Configuration Debug ===");
-        System.out.println("Public Key: '" + vapidPublicKey + "'");
-        System.out.println("Private Key: '" + vapidPrivateKey + "'");
-        System.out.println("Subject: '" + vapidSubject + "'");
-
-        // Check if values are empty
-        if (vapidPublicKey == null || vapidPublicKey.trim().isEmpty()) {
-            throw new RuntimeException("VAPID public key is missing or empty!");
-        }
-        if (vapidPrivateKey == null || vapidPrivateKey.trim().isEmpty()) {
-            throw new RuntimeException("VAPID private key is missing or empty!");
-        }
-        if (vapidSubject == null || vapidSubject.trim().isEmpty()) {
-            throw new RuntimeException("VAPID subject is missing or empty!");
-        }
 
         try {
             this.pushService = new PushService(vapidPublicKey, vapidPrivateKey, vapidSubject);
             System.out.println("✅ PushService created successfully");
         } catch (Exception e) {
             System.err.println("❌ Failed to create PushService: " + e.getMessage());
-            e.printStackTrace();
             throw new RuntimeException("Failed to initialize PushService", e);
         }
     }

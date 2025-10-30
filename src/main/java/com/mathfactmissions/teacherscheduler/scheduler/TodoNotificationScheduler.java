@@ -28,10 +28,14 @@ public class TodoNotificationScheduler {
      * Check for todos due in the next 15 minutes
      * Runs every 5 minutes for good balance of precision vs efficiency
      */
-    @Scheduled(fixedRate = 60000) // Every 5 minutes (300,000 milliseconds)
+    @Scheduled(fixedRate = 300000) // Every 5 minutes (300,000 milliseconds)
     public void checkDueTodos() {
         Instant now = Instant.now();
-        Instant fifteenMinutesFromNow = now.plus(15, ChronoUnit.MINUTES);
+
+        System.out.println("now time " + now);
+
+        Instant fifteenMinutesFromNow = now.plus(10, ChronoUnit.MINUTES);
+        System.out.println("fifteen minutes" + fifteenMinutesFromNow);
 
         List<Todo> todosDueSoon = todoRepository.findTodosDueBetween(now, fifteenMinutesFromNow);
 
@@ -61,7 +65,7 @@ public class TodoNotificationScheduler {
      * Check for overdue todos that haven't been notified yet
      * Runs every hour to catch overdue items
      */
-    @Scheduled(cron = "0 0 * * * *") // Every hour at minute 0
+    @Scheduled(cron = "0 0,30 * * * *") // Every half-hour at minute 0
     public void checkOverdueTodos() {
         Instant now = Instant.now();
         List<Todo> overdueTodos = todoRepository.findOverdueTodos(now);
@@ -90,12 +94,12 @@ public class TodoNotificationScheduler {
     /**
      * Optional: Log scheduler health every hour
      */
-    @Scheduled(cron = "0 30 * * * *") // Every hour at minute 30
-    public void logSchedulerHealth() {
-        Instant now = Instant.now();
-        Instant oneHourFromNow = now.plus(1, ChronoUnit.HOURS);
-
-        long upcomingCount = todoRepository.countTodosDueInNextHour(now, oneHourFromNow);
-        System.out.println("📊 Scheduler Health Check: " + upcomingCount + " todos due in next hour");
-    }
+//    @Scheduled(cron = "0 30 * * * *") // Every hour at minute 30
+//    public void logSchedulerHealth() {
+//        Instant now = Instant.now();
+//        Instant oneHourFromNow = now.plus(1, ChronoUnit.HOURS);
+//
+//        long upcomingCount = todoRepository.countTodosDueInNextHour(now, oneHourFromNow);
+//        System.out.println("📊 Scheduler Health Check: " + upcomingCount + " todos due in next hour");
+//    }
 }
