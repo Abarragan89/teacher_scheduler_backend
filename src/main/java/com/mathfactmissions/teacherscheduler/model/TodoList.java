@@ -34,7 +34,7 @@ public class TodoList {
 
     @Builder.Default
     @OneToMany(mappedBy = "todoList", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("created_at DESC")
+    @OrderBy("priority DESC")
     private List<Todo> todos = new ArrayList<Todo>();
 
     @Builder.Default
