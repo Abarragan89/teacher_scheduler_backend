@@ -56,7 +56,6 @@ public class PushSubscriptionController {
 
     @DeleteMapping("/unsubscribe")
     public ResponseEntity<?> unsubscribe(@RequestBody Map<String, String> request) {
-        System.out.println("request " + request.get("endpoint"));
         try {
             pushSubscriptionService.removeSubscription(request.get("endpoint"));
             return ResponseEntity.ok(Map.of("success", true));

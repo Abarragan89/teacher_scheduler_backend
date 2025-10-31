@@ -38,7 +38,6 @@ public class PushSubscriptionService {
         Optional<PushSubscription> subscription = pushSubscriptionRepository.findByEndpoint(endpoint);
         if (subscription.isPresent()) {
             pushSubscriptionRepository.delete(subscription.get());
-            System.out.println("✅ Successfully deleted subscription ID: " + subscription.get().getId());
         } else {
             System.out.println("❌ No subscription found with endpoint");
         }

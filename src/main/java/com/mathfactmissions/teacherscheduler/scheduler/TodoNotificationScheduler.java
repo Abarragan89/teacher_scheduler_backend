@@ -46,7 +46,7 @@ public class TodoNotificationScheduler {
                 todoRepository.save(todo);
 
             } catch (Exception e) {
-                System.err.println("❌ Failed to send notification for todo: " + todo.getId() + " - " + e.getMessage());
+                System.err.println("❌ Failed to send notification for todo: " + e.getMessage());
             }
         }
     }
@@ -71,7 +71,7 @@ public class TodoNotificationScheduler {
                 todoRepository.save(todo);
 
             } catch (Exception e) {
-                System.err.println("❌ Failed to send overdue notification for todo: " + todo.getId() + " - " + e.getMessage());
+                System.err.println("❌ Failed to send overdue notification for todo: " + " - " + e.getMessage());
             }
         }
     }

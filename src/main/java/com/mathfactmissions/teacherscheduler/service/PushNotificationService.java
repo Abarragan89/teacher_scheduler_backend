@@ -101,14 +101,9 @@ public class PushNotificationService {
                 );
 
                 pushService.send(notification);
-                System.out.println("✅ Notification sent for todo: " + todoId);
-
             } catch (Exception e) {
-                System.err.println("❌ Failed to send notification: " + e.getMessage());
-
                 // Remove invalid subscriptions (expired/uninstalled app)
                 if (e.getMessage().contains("410") || e.getMessage().contains("invalid")) {
-                    System.out.println("🗑️ Removing invalid subscription: " + subscription.getEndpoint());
                     pushSubscriptionService.removeSubscription(subscription.getEndpoint());
                 }
             }

@@ -59,7 +59,6 @@ public class EmailService {
 
         try {
             CreateEmailResponse data = resend.emails().send(params);
-            System.out.println(data.getId());
         } catch (ResendException e) {
             System.out.println("error sending email " + e);
         }
