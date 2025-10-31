@@ -1,11 +1,9 @@
 package com.mathfactmissions.teacherscheduler.repository;
 
-
 import com.mathfactmissions.teacherscheduler.model.Todo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -40,15 +38,15 @@ public interface TodoRepository extends JpaRepository<Todo, UUID> {
     /**
      * Optional: Count todos due in next hour (for optimization)
      */
-    @Query("""
-        SELECT COUNT(t) FROM Todo t 
-        WHERE t.dueDate BETWEEN :now AND :oneHourFromNow
-        AND t.notificationSent = false 
-        AND t.completed = false
-    """)
-    long countTodosDueInNextHour(
-            @Param("now") Instant now,
-            @Param("oneHourFromNow") Instant oneHourFromNow
-    );
+//    @Query("""
+//        SELECT COUNT(t) FROM Todo t
+//        WHERE t.dueDate BETWEEN :now AND :oneHourFromNow
+//        AND t.notificationSent = false
+//        AND t.completed = false
+//    """)
+//    long countTodosDueInNextHour(
+//            @Param("now") Instant now,
+//            @Param("oneHourFromNow") Instant oneHourFromNow
+//    );
 
 }

@@ -5,7 +5,6 @@ import com.mathfactmissions.teacherscheduler.repository.TodoRepository;
 import com.mathfactmissions.teacherscheduler.service.PushNotificationService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -25,26 +24,19 @@ public class TodoNotificationScheduler {
     }
 
     /**
-     * Check for todos due in the next 15 minutes
+     * Check for todos due in the next 10 minutes
      * Runs every 5 minutes for good balance of precision vs efficiency
      */
     @Scheduled(fixedRate = 300000) // Every 5 minutes (300,000 milliseconds)
     public void checkDueTodos() {
         Instant now = Instant.now();
 
-        System.out.println("now time " + now);
+        Instant tenMinutesFromNow = now.plus(10, ChronoUnit.MINUTES);
 
-        Instant fifteenMinutesFromNow = now.plus(10, ChronoUnit.MINUTES);
-        System.out.println("fifteen minutes" + fifteenMinutesFromNow);
-
-        List<Todo> todosDueSoon = todoRepository.findTodosDueBetween(now, fifteenMinutesFromNow);
-
-        System.out.println("📅 Checking for todos due soon... Found: " + todosDueSoon.size());
+        List<Todo> todosDueSoon = todoRepository.findTodosDueBetween(now, tenMinutesFromNow);
 
         for (Todo todo : todosDueSoon) {
             try {
-                System.out.println("🔔 Sending notification for todo: " + todo.getText() + " (due at " + todo.getDueDate() + ")");
-
                 // Send push notification
                 pushNotificationService.sendTodoDueNotification(todo);
 
@@ -52,8 +44,6 @@ public class TodoNotificationScheduler {
                 todo.setNotificationSent(true);
                 todo.setNotificationSentAt(Instant.now());
                 todoRepository.save(todo);
-
-                System.out.println("✅ Notification sent and todo marked as notified");
 
             } catch (Exception e) {
                 System.err.println("❌ Failed to send notification for todo: " + todo.getId() + " - " + e.getMessage());
@@ -70,11 +60,8 @@ public class TodoNotificationScheduler {
         Instant now = Instant.now();
         List<Todo> overdueTodos = todoRepository.findOverdueTodos(now);
 
-        System.out.println("⚠️ Checking for overdue todos... Found: " + overdueTodos.size());
-
         for (Todo todo : overdueTodos) {
             try {
-                System.out.println("🚨 Sending overdue notification for todo: " + todo.getText());
 
                 // Send overdue notification
                 pushNotificationService.sendTodoOverdueNotification(todo);
@@ -82,8 +69,6 @@ public class TodoNotificationScheduler {
                 // Mark as overdue notification sent
                 todo.setOverdueNotificationSent(true);
                 todoRepository.save(todo);
-
-                System.out.println("✅ Overdue notification sent");
 
             } catch (Exception e) {
                 System.err.println("❌ Failed to send overdue notification for todo: " + todo.getId() + " - " + e.getMessage());
