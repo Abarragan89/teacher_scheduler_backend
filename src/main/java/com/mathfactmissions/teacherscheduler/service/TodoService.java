@@ -22,7 +22,7 @@ public class TodoService {
         this.todoListRepository = todoListRepository;
     }
 
-    public TodoResponse createTodoItem(UUID todoId, String todoText) {
+    public TodoResponse createTodoItem(UUID todoId, String todoText, Instant dueDate, Integer priority) {
 
         TodoList todoList = todoListRepository.findById(todoId)
             .orElseThrow(() -> new RuntimeException("No todo list found"));
@@ -30,7 +30,8 @@ public class TodoService {
         Todo newTodo = Todo.builder()
                 .todoList(todoList)
                 .text(todoText)
-                .priority(1)
+                .priority(priority)
+                .dueDate(dueDate)
         .build();
 
         todoRepository.save(newTodo);
