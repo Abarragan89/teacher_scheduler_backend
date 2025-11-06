@@ -24,12 +24,12 @@ public class TodoController {
     @PostMapping("/create-list-item")
     public ResponseEntity<TodoResponse> createListItem(@Valid @RequestBody CreateTodoRequest request) {
         TodoResponse newTodo =  todoService
-                .createTodoItem(
-                    request.todoListId(),
-                    request.todoText(),
-                    request.dueDate(),
-                    request.priority()
-                );
+            .createTodoItem(
+                request.todoListId(),
+                request.todoText(),
+                request.dueDate(),
+                request.priority()
+            );
 
         return ResponseEntity.ok(newTodo);
     }
