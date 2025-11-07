@@ -11,9 +11,6 @@ public record CreateTaskRequest(
         @NotNull(message = "missing position")
         Integer position,
 
-        @NotNull(message = "missing title")
-        String title,
-
         @NotNull(message =  "missing scheduleID")
         UUID scheduleId
 

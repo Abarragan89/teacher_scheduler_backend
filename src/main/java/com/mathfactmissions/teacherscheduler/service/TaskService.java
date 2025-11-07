@@ -41,7 +41,7 @@ public class TaskService {
                 .orElseThrow(() -> new RuntimeException("Task not found"));
     }
 
-    public TaskResponse addTask(UUID scheduleId, String taskTitle, Integer position) {
+    public TaskResponse addTask(UUID scheduleId, Integer position) {
 
         // Find parent schedule
         Schedule schedule = scheduleService.findById(scheduleId);
@@ -49,17 +49,11 @@ public class TaskService {
         // Create the Task
         Task task = new Task();
         task.setCompleted(false);
-        task.setTitle(taskTitle);
         task.setPosition(position);
         task.setSchedule(schedule);
-        taskRepository.save(task);
+        Task savedTask = taskRepository.save(task);
 
-        return TaskResponse.builder()
-                .completed(task.getCompleted())
-                .title(task.getTitle())
-                .position(task.getPosition())
-                .id(task.getId())
-                .build();
+        return TaskResponse.fromEntity(savedTask);
     }
 
     public TaskBasicResponse toggleComplete(
