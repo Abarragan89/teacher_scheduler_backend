@@ -1,6 +1,7 @@
 package com.mathfactmissions.teacherscheduler.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.util.UUID;
@@ -8,6 +9,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "users")
 public class User {
 
@@ -16,15 +19,15 @@ public class User {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Setter
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Setter
+    @Column(name="is_initialized",  nullable = false)
+    private boolean isInitialized = false;
+
     @Column(nullable = false)
     private String username;
 
-    @Setter
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name ="user_roles",
@@ -32,13 +35,4 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id") // FK pointing to Role
     )
     private Set<Role> roles = new HashSet<>();
-
-    // getters and setters
-    public UUID getId() {return id;}
-
-    public String getEmail() { return email;}
-
-    public String getUsername() { return username;}
-
-    public Set<Role> getRoles() {return roles;}
 }

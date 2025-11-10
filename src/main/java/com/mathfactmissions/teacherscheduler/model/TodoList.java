@@ -15,7 +15,12 @@ import java.util.*;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "todo_lists")
+@Table(
+    name = "todo_lists",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "name"})
+    }
+)
 public class TodoList {
 
     @Id

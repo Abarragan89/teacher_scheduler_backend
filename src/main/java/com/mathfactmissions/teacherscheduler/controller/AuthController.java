@@ -1,10 +1,13 @@
 package com.mathfactmissions.teacherscheduler.controller;
 
+import com.mathfactmissions.teacherscheduler.dto.magicLink.request.MagicLinkRequest;
 import com.mathfactmissions.teacherscheduler.dto.user.request.CreateUserRequest;
 import com.mathfactmissions.teacherscheduler.dto.user.response.UserResponse;
+import com.mathfactmissions.teacherscheduler.dto.user.response.UserWithIdResponse;
 import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.security.JwtService;
 import com.mathfactmissions.teacherscheduler.service.MagicLinkService;
+import com.mathfactmissions.teacherscheduler.service.TodoListService;
 import com.mathfactmissions.teacherscheduler.service.UserService;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -28,26 +31,31 @@ public class AuthController {
    private final JwtService jwtService;
    private final UserService userService;
    private final MagicLinkService magicLinkService;
+   private final TodoListService todoListService;
 
    @Autowired
     public AuthController(
             JwtService jwtService,
             UserService userService,
-            MagicLinkService magicLinkService
+            MagicLinkService magicLinkService,
+            TodoListService todoListService
    ) {
        this.jwtService = jwtService;
        this.userService = userService;
        this.magicLinkService = magicLinkService;
+       this.todoListService = todoListService;
    }
 
     @PostMapping("/magic-link-request")
-    public ResponseEntity<?> requestMagicLink(@Valid @RequestBody CreateUserRequest dto) throws JOSEException {
-        // Ensure user exists or create them
-        UserResponse user = userService.findOrCreateUser(dto.email());
-        magicLinkService.sendMagicLink(user);
+    public ResponseEntity<?> requestMagicLink(
+            @Valid @RequestBody MagicLinkRequest dto
+    ) throws JOSEException {
+
+        magicLinkService.sendMagicLink(dto.email());
+
         return ResponseEntity.ok(Map.of(
                 "message", "Magic link sent",
-                "email", user.email()
+                "email", dto.email()
         ));
     }
 
@@ -68,8 +76,15 @@ public class AuthController {
 
         // Find user by email
         String email = magicClaims.getSubject();
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        User user = userService.findOrCreateUser(email);
+
+        if (!user.isInitialized()) {
+            todoListService.createNewList(user.getId(), "Unlisted");
+            user.setInitialized(true);
+            userService.save(user);
+        }
+
 
         // Build claims for access token
         Map<String, Object> accessClaims = new HashMap<>();

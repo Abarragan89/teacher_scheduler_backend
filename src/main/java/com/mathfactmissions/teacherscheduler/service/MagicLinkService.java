@@ -1,7 +1,6 @@
 package com.mathfactmissions.teacherscheduler.service;
 
-import com.mathfactmissions.teacherscheduler.dto.user.response.UserResponse;
-import com.mathfactmissions.teacherscheduler.model.User;
+import com.mathfactmissions.teacherscheduler.dto.user.response.UserWithIdResponse;
 import com.mathfactmissions.teacherscheduler.security.JwtService;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,19 +28,19 @@ public class MagicLinkService {
         this.clientURL = clientURL;
     }
 
-    public void sendMagicLink(UserResponse user) throws JOSEException {
+    public void sendMagicLink(String email) throws JOSEException {
 
         // Create short-lived JWT
         Map<String, Object> claims = new HashMap<>();
         claims.put("magic", true);
-        claims.put("roles", user.roles());
+//        claims.put("roles", user.roles());
 
-        String magicToken = jwtService.generateToken(user.email(), claims, 15);
+        String magicToken = jwtService.generateToken(email, claims, 15);
 
         // Build link
         String link = clientURL + "/user-verification?token=" + magicToken;
 
         // Send email using resend
-        emailService.sendEmail(user.email(), link);
+        emailService.sendEmail(email, link);
     }
 }
