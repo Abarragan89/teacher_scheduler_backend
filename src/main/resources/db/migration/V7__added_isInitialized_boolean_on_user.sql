@@ -7,12 +7,14 @@ ON todo_lists (user_id, LOWER(list_name));
 CREATE OR REPLACE FUNCTION prevent_unlisted_delete()
 RETURNS trigger AS $$
 BEGIN
-    IF OLD.name = 'unlisted' THEN
+    IF OLD.list_name = 'unlisted' THEN
         RAISE EXCEPTION 'Cannot delete the unlisted todo list';
     END IF;
     RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER trg_prevent_unlisted_delete ON todo_lists;
 
 CREATE TRIGGER trg_prevent_unlisted_delete
 BEFORE DELETE ON todo_lists
