@@ -32,7 +32,8 @@ public class TodoService {
                 .text(todoText)
                 .priority(priority)
                 .dueDate(dueDate)
-        .build();
+                .completed(false)
+                .build();
 
         todoRepository.save(newTodo);
         return TodoResponse.fromEntity(newTodo);

@@ -27,7 +27,7 @@ public class TodoNotificationScheduler {
      * Check for todos due in the next 10 minutes
      * Runs every 5 minutes for good balance of precision vs efficiency
      */
-    @Scheduled(fixedRate = 300000) // Every 5 minutes (300,000 milliseconds)
+    @Scheduled(fixedRate = 6000) // Every 5 minutes (300,000 milliseconds)
     public void checkDueTodos() {
         Instant now = Instant.now();
 
@@ -75,16 +75,4 @@ public class TodoNotificationScheduler {
             }
         }
     }
-
-    /**
-     * Optional: Log scheduler health every hour
-     */
-//    @Scheduled(cron = "0 30 * * * *") // Every hour at minute 30
-//    public void logSchedulerHealth() {
-//        Instant now = Instant.now();
-//        Instant oneHourFromNow = now.plus(1, ChronoUnit.HOURS);
-//
-//        long upcomingCount = todoRepository.countTodosDueInNextHour(now, oneHourFromNow);
-//        System.out.println("📊 Scheduler Health Check: " + upcomingCount + " todos due in next hour");
-//    }
 }
