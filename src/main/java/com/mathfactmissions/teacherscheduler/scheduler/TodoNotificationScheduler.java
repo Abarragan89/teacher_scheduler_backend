@@ -27,7 +27,7 @@ public class TodoNotificationScheduler {
      * Check for todos due in the next 10 minutes
      * Runs every 5 minutes for good balance of precision vs efficiency
      */
-    @Scheduled(fixedRate = 6000) // Every 5 minutes (300,000 milliseconds)
+    @Scheduled(fixedRate = 30000) // Every 5 minutes (300,000 milliseconds)
     public void checkDueTodos() {
         Instant now = Instant.now();
 
