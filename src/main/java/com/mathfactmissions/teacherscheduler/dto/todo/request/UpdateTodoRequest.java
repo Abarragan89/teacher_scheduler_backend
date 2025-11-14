@@ -11,5 +11,6 @@ public record UpdateTodoRequest(
         String todoText,
         Boolean completed,
         Integer priority,
-        Instant dueDate
+        Instant dueDate,
+        UUID todoListId
 ) {}

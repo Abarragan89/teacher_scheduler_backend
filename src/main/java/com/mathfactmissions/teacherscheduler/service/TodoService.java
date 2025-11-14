@@ -22,9 +22,9 @@ public class TodoService {
         this.todoListRepository = todoListRepository;
     }
 
-    public TodoResponse createTodoItem(UUID todoId, String todoText, Instant dueDate, Integer priority) {
+    public TodoResponse createTodoItem(UUID todoListId, String todoText, Instant dueDate, Integer priority) {
 
-        TodoList todoList = todoListRepository.findById(todoId)
+        TodoList todoList = todoListRepository.findById(todoListId)
             .orElseThrow(() -> new RuntimeException("No todo list found"));
 
         Todo newTodo = Todo.builder()
@@ -44,11 +44,19 @@ public class TodoService {
             String todoText,
             Boolean completed,
             Integer priority,
-            Instant dueDate
+            Instant dueDate,
+            UUID todoListId
     ) {
 
         Todo currentTodo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new RuntimeException("no todo found"));
+
+        TodoList todoList = currentTodo.getTodoList();
+
+        if (todoListId != todoList.getId()) {
+            todoList = todoListRepository.findById(todoListId)
+                    .orElseThrow(() -> new RuntimeException("no todo list found"));
+        }
 
         Instant oldDueDate = currentTodo.getDueDate();
 
@@ -56,6 +64,7 @@ public class TodoService {
         currentTodo.setCompleted(completed);
         currentTodo.setPriority(priority);
         currentTodo.setDueDate(dueDate);
+        currentTodo.setTodoList(todoList);
 
         if (dueDate != null && !dueDate.equals(oldDueDate)) {
             currentTodo.setNotificationSent(false);

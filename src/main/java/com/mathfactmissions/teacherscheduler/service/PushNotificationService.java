@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 //import java.time.format.DateTimeFormatter;
 //import java.time.ZoneId;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -37,13 +39,16 @@ public class PushNotificationService {
         List<PushSubscription> subscriptions = pushSubscriptionService.getSubscriptionsByUserId(todo.getUserId());
 
         String title = "Todo Due Soon!";
-//        String body = String.format("'%s' is due at %s",
-//                todo.getText(),
-//                todo.getDueDate().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("h:mm a"))
-//        );
+
         String body = String.format("'%s'",
                 todo.getText()
         );
+
+        String dateString = todo.getDueDate()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .format(DateTimeFormatter.ISO_LOCAL_DATE); // yyyy-MM-dd format
+        String targetUrl = String.format("/dashboard/daily/%s?view=todos", dateString);
 
         String payload = String.format("""
             {
@@ -53,7 +58,7 @@ public class PushNotificationService {
                 "badge": "/badge-72x72.png",
                 "data": {
                     "todoId": "%s",
-                    "url": "/dashboard"
+                    "url": "%s"
                 },
                 "actions": [
                     {
@@ -66,7 +71,7 @@ public class PushNotificationService {
                     }
                 ]
             }
-            """, escapeJson(title), escapeJson(body), todo.getId());
+            """, escapeJson(title), escapeJson(body), todo.getId(), targetUrl);
 
         sendNotificationToSubscriptions(subscriptions, payload, todo.getId().toString());
     }

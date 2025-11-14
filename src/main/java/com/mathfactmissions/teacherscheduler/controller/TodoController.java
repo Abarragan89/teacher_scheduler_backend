@@ -37,12 +37,13 @@ public class TodoController {
     @PutMapping("/update-list-item")
     public ResponseEntity<TodoResponse> updateListItem(@Valid @RequestBody UpdateTodoRequest request) {
 
-        TodoResponse updatedTodo =  todoService.updateTodoItem(
+        TodoResponse updatedTodo = todoService.updateTodoItem(
                 request.todoId(),
                 request.todoText(),
                 request.completed(),
                 request.priority(),
-                request.dueDate()
+                request.dueDate(),
+                request.todoListId()
         );
 
         return ResponseEntity.ok(updatedTodo);
