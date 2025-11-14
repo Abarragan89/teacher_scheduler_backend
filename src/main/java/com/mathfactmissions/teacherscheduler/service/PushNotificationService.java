@@ -47,7 +47,8 @@ public class PushNotificationService {
         String dateString = todo.getDueDate()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate()
-                .format(DateTimeFormatter.ISO_LOCAL_DATE); // yyyy-MM-dd format
+                .format(DateTimeFormatter.ISO_LOCAL_DATE);
+
         String targetUrl = String.format("/dashboard/daily/%s?view=todos", dateString);
 
         String payload = String.format("""
@@ -73,6 +74,8 @@ public class PushNotificationService {
             }
             """, escapeJson(title), escapeJson(body), todo.getId(), targetUrl);
 
+        System.out.println("payload " + payload);
+
         sendNotificationToSubscriptions(subscriptions, payload, todo.getId().toString());
     }
 
@@ -82,18 +85,37 @@ public class PushNotificationService {
         String title = "Todo Overdue!";
         String body = String.format("'%s' was due and is now overdue", todo.getText());
 
+        // Extract date from todo's due date and format it for the URL
+        String dateString = todo.getDueDate()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .format(DateTimeFormatter.ISO_LOCAL_DATE);
+
+        String targetUrl = String.format("/dashboard/daily/%s?view=todos", dateString);
+
         String payload = String.format("""
-            {
-                "title": "%s",
-                "body": "%s",
-                "icon": "/icon-192x192.png",
-                "badge": "/badge-72x72.png",
-                "data": {
-                    "todoId": "%s",
-                    "url": "/dashboard"
+        {
+            "title": "%s",
+            "body": "%s",
+            "icon": "/icon-192x192.png",
+            "badge": "/badge-72x72.png",
+            "data": {
+                "todoId": "%s",
+                "url": "%s",
+                "type": "todo_overdue"
+            },
+            "actions": [
+                {
+                    "action": "mark-complete",
+                    "title": "Mark Complete"
+                },
+                {
+                    "action": "snooze",
+                    "title": "Snooze 1hr"
                 }
-            }
-            """, escapeJson(title), escapeJson(body), todo.getId());
+            ]
+        }
+        """, escapeJson(title), escapeJson(body), todo.getId(), targetUrl);
 
         sendNotificationToSubscriptions(subscriptions, payload, todo.getId().toString());
     }
