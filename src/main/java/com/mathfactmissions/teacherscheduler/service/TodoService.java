@@ -3,7 +3,6 @@ package com.mathfactmissions.teacherscheduler.service;
 import com.mathfactmissions.teacherscheduler.dto.todo.response.TodoResponse;
 import com.mathfactmissions.teacherscheduler.model.Todo;
 import com.mathfactmissions.teacherscheduler.model.TodoList;
-import com.mathfactmissions.teacherscheduler.repository.TodoListRepository;
 import com.mathfactmissions.teacherscheduler.repository.TodoRepository;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
@@ -12,19 +11,19 @@ import java.util.UUID;
 @Service
 public class TodoService {
     public final TodoRepository todoRepository;
-    public final TodoListRepository todoListRepository;
+    public final TodoListService todoListService;
 
     public TodoService(
             TodoRepository todoRepository,
-            TodoListRepository todoListRepository
+            TodoListService todoListService
     ){
         this.todoRepository = todoRepository;
-        this.todoListRepository = todoListRepository;
+        this.todoListService = todoListService;
     }
 
     public TodoResponse createTodoItem(UUID todoListId, String todoText, Instant dueDate, Integer priority) {
 
-        TodoList todoList = todoListRepository.findById(todoListId)
+        TodoList todoList = todoListService.findById(todoListId)
             .orElseThrow(() -> new RuntimeException("No todo list found"));
 
         Todo newTodo = Todo.builder()
@@ -54,7 +53,7 @@ public class TodoService {
         TodoList todoList = currentTodo.getTodoList();
 
         if (todoListId != todoList.getId()) {
-            todoList = todoListRepository.findById(todoListId)
+            todoList = todoListService.findById(todoListId)
                     .orElseThrow(() -> new RuntimeException("no todo list found"));
         }
 

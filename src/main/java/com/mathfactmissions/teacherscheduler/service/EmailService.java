@@ -51,7 +51,7 @@ public class EmailService {
 
 
         CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("Acme <customer.team@math-fact-missions.com>")
+                .from("Teach For Free <customer.team@math-fact-missions.com>")
                 .to(email)
                 .subject("Welcome To Teacher Scheduler")
                 .html(html)

@@ -1,4 +1,5 @@
 package com.mathfactmissions.teacherscheduler.service;
+
 import com.mathfactmissions.teacherscheduler.dto.todoList.response.TodoListResponse;
 import com.mathfactmissions.teacherscheduler.model.TodoList;
 import com.mathfactmissions.teacherscheduler.model.User;
@@ -79,6 +80,10 @@ public class TodoListService {
                 })
             );
         return true;
+    }
+
+    public Optional<TodoList> findById(UUID todoListId) {
+        return todoListRepository.findById(todoListId);
     }
 
 }

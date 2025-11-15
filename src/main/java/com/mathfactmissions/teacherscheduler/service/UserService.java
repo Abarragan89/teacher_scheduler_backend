@@ -1,7 +1,5 @@
 package com.mathfactmissions.teacherscheduler.service;
 
-import com.mathfactmissions.teacherscheduler.dto.user.response.UserResponse;
-import com.mathfactmissions.teacherscheduler.dto.user.response.UserWithIdResponse;
 import com.mathfactmissions.teacherscheduler.exception.EmailAlreadyExistsException;
 import com.mathfactmissions.teacherscheduler.model.Role;
 import com.mathfactmissions.teacherscheduler.model.User;
@@ -57,11 +55,6 @@ public class UserService {
         return userRepository.findByEmail(email)
                 .orElseGet(() -> createUser(email));
 
-//        return User.builder()
-//                .username(newUser.getUsername())
-//                .email(newUser.getEmail())
-//                .roles(newUser.getRoles())
-//                .build();
     }
 
     public Optional<User> findByEmail (String email) {
