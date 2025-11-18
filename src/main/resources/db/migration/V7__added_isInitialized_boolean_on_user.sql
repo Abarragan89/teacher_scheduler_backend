@@ -14,8 +14,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER trg_prevent_unlisted_delete ON todo_lists;
-
 CREATE TRIGGER trg_prevent_unlisted_delete
 BEFORE DELETE ON todo_lists
 FOR EACH ROW

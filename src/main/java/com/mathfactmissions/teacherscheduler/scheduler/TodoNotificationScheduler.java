@@ -76,3 +76,8 @@ public class TodoNotificationScheduler {
         }
     }
 }
+
+//jdbc:postgres://postgres:OsPHcsMo0uduPk23FQ83MWuiNRa00UOo3VVMIVXwL55ol8aV0vCcq9eWjUJzIUKK@ng0scco0gc0s8csw4kscgswk:5432/postgres
+// jdbc:postgresql://ng0scco0gc0s8csw4kscgswk:5432/postgresql-database-ng0scco0gc0s8csw4kscgswk
+//
+//jdbc:postgresql://ep-weathered-math-a4b0wqt7-pooler.us-east-1.aws.neon.tech/neondb?options=endpoint=ep-weathered-math-a4b0wqt7-pooler&sslmode=require&channel_binding=require
