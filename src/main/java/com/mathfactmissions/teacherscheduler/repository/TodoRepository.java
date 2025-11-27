@@ -1,7 +1,9 @@
 package com.mathfactmissions.teacherscheduler.repository;
 
 import com.mathfactmissions.teacherscheduler.model.Todo;
+import com.mathfactmissions.teacherscheduler.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.Instant;
@@ -35,18 +37,24 @@ public interface TodoRepository extends JpaRepository<Todo, UUID> {
     """)
     List<Todo> findOverdueTodos(@Param("now") Instant now);
 
-    /**
-     * Optional: Count todos due in next hour (for optimization)
-     */
-//    @Query("""
-//        SELECT COUNT(t) FROM Todo t
-//        WHERE t.dueDate BETWEEN :now AND :oneHourFromNow
-//        AND t.notificationSent = false
-//        AND t.completed = false
-//    """)
-//    long countTodosDueInNextHour(
-//            @Param("now") Instant now,
-//            @Param("oneHourFromNow") Instant oneHourFromNow
-//    );
+    @Query("SELECT t FROM Todo t WHERE t.isRecurring = true")
+    List<Todo> findAllRecurringTodos();
+
+//    @Query("SELECT COUNT(t) > 0 FROM Todo t WHERE t.recurringParentId = :parentId AND t.dueDate = :dueDate")
+//    boolean existsByRecurringParentIdAndDueDate(@Param("parentId") UUID parentId, @Param("dueDate") Instant dueDate);
+//
+//    @Modifying
+//    @Query("DELETE FROM Todo t WHERE t.recurringParentId = :parentId AND t.dueDate > :afterDate")
+//    void deleteByRecurringParentIdAndDueDateAfter(@Param("parentId") UUID parentId, @Param("afterDate") Instant afterDate);
+
+
+//    @Modifying
+//    @Query("DELETE FROM Todo t WHERE t.recurringParent = :parent AND t.dueDate > :afterDate")
+//    void deleteByRecurringParentAndDueDateAfter(@Param("parent") Todo parent, @Param("afterDate") Instant afterDate);
+
+//    @Query("SELECT COUNT(t) > 0 FROM Todo t WHERE t.recurringParent = :parent AND t.dueDate = :dueDate")
+//    boolean existsByRecurringParentAndDueDate(@Param("parent") Todo parent, @Param("dueDate") Instant dueDate);
+
+//    List<Todo> findByUserAndIsRecurring(User user, Boolean isRecurring);
 
 }

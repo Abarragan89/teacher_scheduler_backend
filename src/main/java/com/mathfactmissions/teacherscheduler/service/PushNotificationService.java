@@ -6,8 +6,6 @@ import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-//import java.time.format.DateTimeFormatter;
-//import java.time.ZoneId;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
