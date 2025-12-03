@@ -1,7 +1,7 @@
 package com.mathfactmissions.teacherscheduler.repository;
 
 import com.mathfactmissions.teacherscheduler.model.Todo;
-import com.mathfactmissions.teacherscheduler.model.User;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -43,9 +43,10 @@ public interface TodoRepository extends JpaRepository<Todo, UUID> {
 //    @Query("SELECT COUNT(t) > 0 FROM Todo t WHERE t.recurringParentId = :parentId AND t.dueDate = :dueDate")
 //    boolean existsByRecurringParentIdAndDueDate(@Param("parentId") UUID parentId, @Param("dueDate") Instant dueDate);
 //
-//    @Modifying
-//    @Query("DELETE FROM Todo t WHERE t.recurringParentId = :parentId AND t.dueDate > :afterDate")
-//    void deleteByRecurringParentIdAndDueDateAfter(@Param("parentId") UUID parentId, @Param("afterDate") Instant afterDate);
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Todo t WHERE t.recurrencePattern.id = :patternId")
+    void deleteByRecurringPattern(@Param("patternId") UUID patternId);
 
 
 //    @Modifying

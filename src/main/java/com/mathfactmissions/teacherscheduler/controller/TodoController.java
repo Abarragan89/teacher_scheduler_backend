@@ -3,6 +3,8 @@ package com.mathfactmissions.teacherscheduler.controller;
 import com.mathfactmissions.teacherscheduler.dto.todo.request.CreateTodoRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.request.UpdateTodoRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.response.TodoResponse;
+import com.mathfactmissions.teacherscheduler.model.RecurrencePattern;
+import com.mathfactmissions.teacherscheduler.service.RecurrencePatternService;
 import com.mathfactmissions.teacherscheduler.service.TodoService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -16,22 +18,32 @@ import java.util.UUID;
 public class TodoController {
 
     public final TodoService todoService;
+    public final RecurrencePatternService recurrencePatternService;
 
-    public TodoController(TodoService todoService) {
+    public TodoController(TodoService todoService, RecurrencePatternService recurrencePatternService) {
         this.todoService = todoService;
+        this.recurrencePatternService = recurrencePatternService;
     }
+
 
     @PostMapping("/create-list-item")
     public ResponseEntity<TodoResponse> createListItem(@Valid @RequestBody CreateTodoRequest request) {
-        TodoResponse newTodo =  todoService
-            .createTodoItem(
-                request.todoListId(),
-                request.todoText(),
-                request.dueDate(),
-                request.priority()
-            );
+        System.out.println("=== CONTROLLER CALLED ===");
+        System.out.println("Request: " + request);
+        System.out.println("TodoListId: " + request.todoListId());
+        System.out.println("IsRecurring: " + request.isRecurring());
 
-        return ResponseEntity.ok(newTodo);
+        try {
+            TodoResponse newTodo = todoService.createTodoItem(request);
+            System.out.println("=== CONTROLLER RETURNING ===");
+            return ResponseEntity.ok(newTodo);
+        } catch (Exception e) {
+            System.out.println("=== CONTROLLER ERROR ===");
+            System.out.println("TodoListId: " + request.todoListId());
+            System.out.println("IsRecurring: " + request.isRecurring());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @PutMapping("/update-list-item")
@@ -60,5 +72,7 @@ public class TodoController {
 
         return ResponseEntity.noContent().build(); // 204 No Content
     }
+
+
 
 }

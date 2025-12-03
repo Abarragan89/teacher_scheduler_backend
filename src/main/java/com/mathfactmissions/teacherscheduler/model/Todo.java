@@ -51,7 +51,7 @@ public class Todo {
     @Column(name = "is_recurring")
     private Boolean isRecurring = false;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "recurrence_pattern_id")
     private RecurrencePattern recurrencePattern;
 

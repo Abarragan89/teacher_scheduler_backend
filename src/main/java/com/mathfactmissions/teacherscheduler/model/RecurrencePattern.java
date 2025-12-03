@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-
 import java.time.Instant;
 import java.time.LocalTime;
 import java.util.UUID;
@@ -37,7 +36,7 @@ public class RecurrencePattern {
     @Column(name="month_pattern_type")
     private MonthPatternType monthPatternType;
 
-    @Column(name="day_of_month")
+    @Column(name="days_of_month")
     private String daysOfMonth;
 
     @Column(name = "nth_weekday_occurrence")

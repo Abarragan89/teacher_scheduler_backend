@@ -1,6 +1,6 @@
 package com.mathfactmissions.teacherscheduler.service;
 
-import com.mathfactmissions.teacherscheduler.dto.recurringTodos.request.CreateRecurringTodoRequest;
+import com.mathfactmissions.teacherscheduler.dto.recurringTodos.request.CreateRecurrencePatternRequest;
 import com.mathfactmissions.teacherscheduler.dto.recurringTodos.response.RecurrencePatternDetails;
 import com.mathfactmissions.teacherscheduler.dto.recurringTodos.response.RecurringTodoResponse;
 import com.mathfactmissions.teacherscheduler.model.Todo;
@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class RecurringTodoService {
+public class RecurrencePatternService {
 
     private final TodoRepository todoRepository;
     private final TodoListRepository todoListRepository;
     private final RecurrencePatternRepository recurrencePatternRepository;
 
-    public RecurringTodoService
+    public RecurrencePatternService
             (TodoRepository todoRepository,
              RecurrencePatternRepository recurrencePatternRepository,
              TodoListRepository todoListRepository
@@ -43,44 +43,17 @@ public class RecurringTodoService {
      * Create recurring todo and generate immediate first occurrence
      */
     @Transactional
-    public RecurringTodoResponse createRecurringTodo(CreateRecurringTodoRequest request, UUID userId) {
-        log.info("Creating recurring todo for user: {} with type: {}", userId, request.recurrenceType());
-
-        // Create and save recurrence pattern using builder
+    public RecurrencePattern createRecurrencePattern(CreateRecurrencePatternRequest request) {
+        // Only create and return the pattern, do not create a Todo here
         RecurrencePattern pattern = buildRecurrencePattern(request);
-        RecurrencePattern savedPattern = recurrencePatternRepository.save(pattern);
 
-        TodoList todoList = todoListRepository.findById(request.listId())
-                .orElseThrow( () -> new RuntimeException("No List found"));
-
-        // Create master recurring todo using builder
-        Todo recurringTodo = Todo.builder()
-                .text(request.text())
-                .todoList(todoList)
-                .isRecurring(true)
-                .recurrencePattern(savedPattern)
-                .completed(false)
-                .notificationSent(false)
-                .overdueNotificationSent(false)
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .build();
-
-        Todo savedRecurringTodo = todoRepository.save(recurringTodo);
-
-        // 🎯 IMMEDIATELY generate first few occurrences (next 7 days)
-        generateImmediateOccurrences(savedRecurringTodo, 7);
-
-        log.info("Created recurring todo: {} with pattern: {}",
-                savedRecurringTodo.getId(), pattern.getType());
-
-        return toResponse(savedRecurringTodo);
+        return recurrencePatternRepository.save(pattern);
     }
 
     /**
      * Build RecurrencePattern using Lombok builder based on request type
      */
-    private RecurrencePattern buildRecurrencePattern(CreateRecurringTodoRequest request) {
+    private RecurrencePattern buildRecurrencePattern(CreateRecurrencePatternRequest request) {
         RecurrencePattern.RecurrencePatternBuilder builder = RecurrencePattern.builder()
                 .type(RecurrenceType.valueOf(request.recurrenceType().toUpperCase()))
                 .timeOfDay(LocalTime.parse(request.time()))
@@ -117,7 +90,7 @@ public class RecurringTodoService {
     /**
      * Generate occurrences immediately upon creation
      */
-    private void generateImmediateOccurrences(Todo recurringTodo, int daysAhead) {
+    public void generateImmediateOccurrences(Todo recurringTodo, TodoList todoList, int daysAhead) {
         LocalDate today = LocalDate.now();
         LocalDate endDate = today.plusDays(daysAhead);
 
@@ -128,15 +101,18 @@ public class RecurringTodoService {
         );
 
         for (LocalDate occurrence : occurrences) {
-            createTodoInstance(recurringTodo, occurrence);
+            createTodoInstance(recurringTodo, todoList, occurrence);
         }
 
         // Update last generated date
-        Todo updatedTodo = Todo.builder()
-                .lastGeneratedDate(endDate)
-                .updatedAt(Instant.now())
-                .build();
-        todoRepository.save(updatedTodo);
+//        Todo updatedTodo = Todo.builder()
+//                .lastGeneratedDate(endDate)
+//
+//                .todoList(todoList)
+//                .updatedAt(Instant.now())
+//                .build();
+
+//        todoRepository.save(updatedTodo);
 
         log.info("Generated {} immediate occurrences for recurring todo: {}",
                 occurrences.size(), recurringTodo.getId());
@@ -177,9 +153,9 @@ public class RecurringTodoService {
                     targetEndDate
             );
 
-            for (LocalDate occurrence : newOccurrences) {
-                createTodoInstance(recurringTodo, occurrence);
-            }
+//            for (LocalDate occurrence : newOccurrences) {
+//                createTodoInstance(recurringTodo, todoList, occurrence);
+//            }
 
             Todo updatedTodo = Todo.builder()
                     .lastGeneratedDate(targetEndDate)
@@ -386,22 +362,20 @@ public class RecurringTodoService {
     /**
      * Create individual todo instance using Lombok builder
      */
-    private void createTodoInstance(Todo recurringTodo, LocalDate occurrence) {
+    private void createTodoInstance(Todo recurringTodo, TodoList todoList, LocalDate occurrence) {
         LocalDateTime occurrenceDateTime = occurrence.atTime(recurringTodo.getRecurrencePattern().getTimeOfDay());
         Instant dueDate = occurrenceDateTime.atZone(ZoneId.systemDefault()).toInstant();
 
         // Check if instance already exists
 //        boolean exists = todoRepository.existsByRecurringParentAndDueDate(recurringTodo, dueDate);
-
-
-
+        System.out.println("In createTodoInstant (Text): " + recurringTodo.getText());
 
 //        if (!exists) {
             Todo instance = Todo.builder()
                     .text(recurringTodo.getText())
-                    .todoList(recurringTodo.getTodoList())
+                    .todoList(todoList)
                     .dueDate(dueDate)
-                    .isRecurring(false) // Instance is not recurring itself
+                    .isRecurring(true) // Instance is not recurring itself
                     .recurrencePattern(recurringTodo.getRecurrencePattern()) // Track parent
                     .notificationSent(false)
                     .overdueNotificationSent(false)
@@ -410,7 +384,8 @@ public class RecurringTodoService {
                     .updatedAt(Instant.now())
                     .build();
 
-            todoRepository.save(instance);
+
+        todoRepository.save(instance);
 
             log.debug("Created todo instance for date: {} from recurring parent: {}",
                     occurrence, recurringTodo.getId());

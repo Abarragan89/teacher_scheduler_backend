@@ -1,5 +1,7 @@
 package com.mathfactmissions.teacherscheduler.dto.todo.response;
 
+import com.mathfactmissions.teacherscheduler.dto.recurringTodos.request.CreateRecurrencePatternRequest;
+import com.mathfactmissions.teacherscheduler.model.RecurrencePattern;
 import com.mathfactmissions.teacherscheduler.model.Todo;
 import lombok.Builder;
 import java.time.Instant;
@@ -11,7 +13,9 @@ public record TodoResponse(
         String text,
         Integer priority,
         Instant dueDate,
-        Boolean completed
+        Boolean completed,
+        Boolean isRecurring,
+        RecurrencePattern recurrencePattern
 ) {
     public static TodoResponse fromEntity(Todo todo) {
         return TodoResponse.builder()
@@ -20,6 +24,8 @@ public record TodoResponse(
             .text(todo.getText())
             .completed(todo.getCompleted())
             .priority(todo.getPriority())
+            .isRecurring(todo.getIsRecurring())
+            .recurrencePattern(todo.getRecurrencePattern())
             .build();
     }
 }

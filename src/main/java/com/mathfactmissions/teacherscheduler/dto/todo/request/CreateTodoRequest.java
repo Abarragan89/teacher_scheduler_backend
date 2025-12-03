@@ -1,5 +1,5 @@
 package com.mathfactmissions.teacherscheduler.dto.todo.request;
-
+import com.mathfactmissions.teacherscheduler.dto.recurringTodos.request.CreateRecurrencePatternRequest;
 import lombok.Builder;
 
 import java.time.Instant;
@@ -11,7 +11,8 @@ public record CreateTodoRequest(
         String todoText,
         UUID todoId,
         Integer priority,
-        Instant dueDate
-
+        Instant dueDate,
+        Boolean isRecurring,
+        CreateRecurrencePatternRequest recurrencePattern
 ) {
 }
