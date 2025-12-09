@@ -1,9 +1,7 @@
 package com.mathfactmissions.teacherscheduler.repository;
 
 import com.mathfactmissions.teacherscheduler.model.Todo;
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.Instant;
@@ -20,8 +18,8 @@ public interface TodoRepository extends JpaRepository<Todo, UUID> {
         ORDER BY t.dueDate ASC
     """)
     List<Todo> findTodosDueBetween(
-            @Param("start") Instant start,
-            @Param("end") Instant end
+    @Param("start") Instant start,
+    @Param("end") Instant end
     );
 
     /**
@@ -36,26 +34,4 @@ public interface TodoRepository extends JpaRepository<Todo, UUID> {
         ORDER BY t.dueDate ASC
     """)
     List<Todo> findOverdueTodos(@Param("now") Instant now);
-
-    @Query("SELECT t FROM Todo t WHERE t.isRecurring = true")
-    List<Todo> findAllRecurringTodos();
-
-//    @Query("SELECT COUNT(t) > 0 FROM Todo t WHERE t.recurringParentId = :parentId AND t.dueDate = :dueDate")
-//    boolean existsByRecurringParentIdAndDueDate(@Param("parentId") UUID parentId, @Param("dueDate") Instant dueDate);
-//
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM Todo t WHERE t.recurrencePattern.id = :patternId")
-    void deleteByRecurringPattern(@Param("patternId") UUID patternId);
-
-
-//    @Modifying
-//    @Query("DELETE FROM Todo t WHERE t.recurringParent = :parent AND t.dueDate > :afterDate")
-//    void deleteByRecurringParentAndDueDateAfter(@Param("parent") Todo parent, @Param("afterDate") Instant afterDate);
-
-//    @Query("SELECT COUNT(t) > 0 FROM Todo t WHERE t.recurringParent = :parent AND t.dueDate = :dueDate")
-//    boolean existsByRecurringParentAndDueDate(@Param("parent") Todo parent, @Param("dueDate") Instant dueDate);
-
-//    List<Todo> findByUserAndIsRecurring(User user, Boolean isRecurring);
-
 }

@@ -1,11 +1,9 @@
 package com.mathfactmissions.teacherscheduler.controller;
 
-import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/users")

@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,13 +36,11 @@ public class DaysController {
 
 
     @PostMapping("/find-or-create")
-    public ResponseEntity<DayResponse> findOrCreateDay(@RequestBody @Valid DayRequest request) {
+    public ResponseEntity<DayResponse> findOrCreateDay(
+        @AuthenticationPrincipal UserPrincipal userInfo,
+        @RequestBody @Valid DayRequest request
+    ) {
 
-        // Get the currently authenticated user ID
-        UserPrincipal userInfo = (UserPrincipal) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
         UUID userId = userInfo.getId();
 
         // Call the service to find or create the day
@@ -50,12 +49,10 @@ public class DaysController {
     }
 
     @PostMapping("/move-schedule-to-date")
-    public ResponseEntity<Boolean> moveScheduleToDate(@RequestBody @Valid MoveScheduleRequest request) {
-        // Get the currently authenticated user ID
-        UserPrincipal userInfo = (UserPrincipal) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
+    public ResponseEntity<Boolean> moveScheduleToDate(
+        @RequestBody @Valid MoveScheduleRequest request,
+        @AuthenticationPrincipal UserPrincipal userInfo
+    ) {
         UUID userId = userInfo.getId();
 
         dayService.createOrFindDayWithSchedule(userId, request.dayDate(), request.scheduleId());

@@ -5,10 +5,7 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
@@ -47,19 +44,10 @@ public class Todo {
     @Column(nullable = false)
     private Boolean completed;
 
-    @Builder.Default
-    @Column(name = "is_recurring")
-    private Boolean isRecurring = false;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recurrence_pattern_id")
     private RecurrencePattern recurrencePattern;
-
-    @Column(name = "next_occurrence")
-    private Instant nextOccurrence;
-
-    @Column(name = "last_generated_date")
-    private LocalDate lastGeneratedDate;
 
     @Builder.Default
     @Column(name = "notification_sent", nullable = false)

@@ -4,12 +4,14 @@ import com.mathfactmissions.teacherscheduler.dto.todo.request.CreateTodoRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.request.UpdateTodoRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.response.TodoResponse;
 import com.mathfactmissions.teacherscheduler.model.RecurrencePattern;
+import com.mathfactmissions.teacherscheduler.security.UserPrincipal;
 import com.mathfactmissions.teacherscheduler.service.RecurrencePatternService;
 import com.mathfactmissions.teacherscheduler.service.TodoService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.UUID;
 
 
@@ -25,23 +27,21 @@ public class TodoController {
         this.recurrencePatternService = recurrencePatternService;
     }
 
-
     @PostMapping("/create-list-item")
-    public ResponseEntity<TodoResponse> createListItem(@Valid @RequestBody CreateTodoRequest request) {
-        System.out.println("=== CONTROLLER CALLED ===");
-        System.out.println("Request: " + request);
-        System.out.println("TodoListId: " + request.todoListId());
-        System.out.println("IsRecurring: " + request.isRecurring());
-
+    public ResponseEntity<?> createListItem(
+        @Valid @RequestBody CreateTodoRequest request,
+        @AuthenticationPrincipal UserPrincipal userInfo
+    ) {
         try {
-            TodoResponse newTodo = todoService.createTodoItem(request);
-            System.out.println("=== CONTROLLER RETURNING ===");
-            return ResponseEntity.ok(newTodo);
+            if (request.isRecurring()) {
+                RecurrencePattern newPattern = recurrencePatternService.createRecurrencePattern(request, userInfo.getId());
+                return ResponseEntity.ok(newPattern);
+            } else {
+                TodoResponse newTodo = todoService.createTodoItem(request);
+                return ResponseEntity.ok(newTodo);
+            }
         } catch (Exception e) {
             System.out.println("=== CONTROLLER ERROR ===");
-            System.out.println("TodoListId: " + request.todoListId());
-            System.out.println("IsRecurring: " + request.isRecurring());
-            e.printStackTrace();
             throw e;
         }
     }
@@ -61,13 +61,33 @@ public class TodoController {
         return ResponseEntity.ok(updatedTodo);
     }
 
-    @DeleteMapping("/delete-list-item/{todoId}")
-    public ResponseEntity<Void> deleteListItem(@PathVariable UUID todoId) {
+//    @GetMapping("/get-recurring-todos-in-range/{startDate}/{endDate}")
+//    public ResponseEntity<List<RecurringTodoView>> getRecurringTodosInRange(@PathVariable LocalDate startDate, @PathVariable LocalDate endDate) {
+//        UserPrincipal user = (UserPrincipal) SecurityContextHolder
+//            .getContext()
+//            .getAuthentication()
+//            .getPrincipal();
+//        UUID userId = user.getId();
+//
+//        List<RecurringTodoView> recurring = todoService.getRecurringTodosInRange(userId, startDate, endDate);
+//
+//        return ResponseEntity.ok(recurring);
+//
+//    }
 
+
+    @DeleteMapping("/delete-list-item/{todoId}")
+    public ResponseEntity<String> deleteListItem(@PathVariable UUID todoId) {
+        try {
         boolean deleted = todoService.deleteListItem(todoId);
 
         if (!deleted) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok("Todo deleted");
+        }
+
+        } catch(Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Failed to delete todos");
         }
 
         return ResponseEntity.noContent().build(); // 204 No Content

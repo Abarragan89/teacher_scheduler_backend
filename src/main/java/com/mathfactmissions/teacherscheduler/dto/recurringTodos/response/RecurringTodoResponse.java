@@ -1,6 +1,5 @@
 package com.mathfactmissions.teacherscheduler.dto.recurringTodos.response;
 
-import com.mathfactmissions.teacherscheduler.model.RecurrencePattern;
 import com.mathfactmissions.teacherscheduler.model.TodoList;
 import lombok.Builder;
 import java.time.Instant;
@@ -18,6 +17,5 @@ public record RecurringTodoResponse(
         LocalDate lastGeneratedDate,
         Instant createdAt,
         Instant updatedAt,
-        String patternDescription,
-        RecurrencePatternDetails patternDetails
+        String patternDescription
 ) {}

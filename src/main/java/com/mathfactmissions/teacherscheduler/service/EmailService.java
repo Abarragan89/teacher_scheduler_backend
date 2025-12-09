@@ -3,7 +3,6 @@ package com.mathfactmissions.teacherscheduler.service;
 import com.resend.core.exception.ResendException;
 import com.resend.services.emails.model.CreateEmailOptions;
 import com.resend.services.emails.model.CreateEmailResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.resend.*;
@@ -13,7 +12,6 @@ public class EmailService {
 
     private final String resendApiKey;
 
-    @Autowired
     public EmailService(@Value("${resend.api.key}") String resendApiKey) {
         this.resendApiKey = resendApiKey;
     }

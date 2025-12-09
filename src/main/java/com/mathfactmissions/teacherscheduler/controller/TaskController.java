@@ -3,14 +3,13 @@ package com.mathfactmissions.teacherscheduler.controller;
 import com.mathfactmissions.teacherscheduler.dto.task.request.*;
 import com.mathfactmissions.teacherscheduler.dto.task.response.TaskBasicResponse;
 import com.mathfactmissions.teacherscheduler.dto.task.response.TaskResponse;
-import com.mathfactmissions.teacherscheduler.model.Task;
 import com.mathfactmissions.teacherscheduler.security.UserPrincipal;
 import com.mathfactmissions.teacherscheduler.service.TaskService;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -86,14 +85,11 @@ public class TaskController {
     }
 
     @PostMapping("/move-to-later-date")
-    public ResponseEntity<Void> moveTaskToLaterDate(@RequestBody @Valid MoveTaskToLaterDate request) {
+    public ResponseEntity<Void> moveTaskToLaterDate(
+        @AuthenticationPrincipal UserPrincipal userInfo,
+        @RequestBody @Valid MoveTaskToLaterDate request
+    ) {
 
-
-        // Get the currently authenticated user ID
-        UserPrincipal userInfo = (UserPrincipal) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
         UUID userId = userInfo.getId();
 
         taskService.moveTaskToAnotherDate(

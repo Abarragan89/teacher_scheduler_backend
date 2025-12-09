@@ -5,13 +5,11 @@ import com.mathfactmissions.teacherscheduler.dto.PushSubscription.request.Subscr
 import com.mathfactmissions.teacherscheduler.model.PushSubscription;
 import com.mathfactmissions.teacherscheduler.security.UserPrincipal;
 import com.mathfactmissions.teacherscheduler.service.PushSubscriptionService;
-import com.mathfactmissions.teacherscheduler.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,13 +30,11 @@ public class PushSubscriptionController {
 
 
     @PostMapping("/subscribe")
-    public ResponseEntity<?> subscribe(@RequestBody SubscriptionRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> subscribe(
+        @AuthenticationPrincipal UserPrincipal userInfo,
+        @RequestBody SubscriptionRequest request, HttpServletRequest httpRequest
+    ) {
         try {
-            // Get the currently authenticated user ID
-            UserPrincipal userInfo = (UserPrincipal) SecurityContextHolder
-                    .getContext()
-                    .getAuthentication()
-                    .getPrincipal();
             UUID userId = userInfo.getId();
 
             PushSubscription subscription = pushSubscriptionService.saveSubscription(

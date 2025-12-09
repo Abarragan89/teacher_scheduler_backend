@@ -3,7 +3,6 @@ package com.mathfactmissions.teacherscheduler.controller;
 import com.mathfactmissions.teacherscheduler.model.Holiday;
 import com.mathfactmissions.teacherscheduler.service.HolidayService;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController

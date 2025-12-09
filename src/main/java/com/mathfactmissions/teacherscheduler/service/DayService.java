@@ -4,6 +4,7 @@ import com.mathfactmissions.teacherscheduler.dto.day.response.DayResponse;
 import com.mathfactmissions.teacherscheduler.model.*;
 import com.mathfactmissions.teacherscheduler.repository.DayRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -12,22 +13,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class DayService {
 
     private final DayRepository dayRepository;
     private final UserService userService;
     private final ScheduleService scheduleService;
-
-    @Autowired
-    public DayService(
-            DayRepository dayRepository,
-            UserService userService,
-            ScheduleService scheduleService
-    ) {
-        this.dayRepository = dayRepository;
-        this.userService = userService;
-        this.scheduleService = scheduleService;
-    }
 
     public DayResponse findSingleDay(UUID dayId){
         Day day = dayRepository.findById(dayId)

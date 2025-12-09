@@ -4,26 +4,18 @@ import com.mathfactmissions.teacherscheduler.dto.todoList.response.TodoListRespo
 import com.mathfactmissions.teacherscheduler.model.TodoList;
 import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.repository.TodoListRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class TodoListService {
 
     private final TodoListRepository todoListRepository;
     private final UserService userService;
-
-    public  TodoListService(
-        TodoListRepository todoListRepository,
-        UserService userService
-    ) {
-        this.todoListRepository = todoListRepository;
-        this.userService = userService;
-    }
-
 
     public TodoList createNewList(UUID userId, String listName) {
         // Find user
@@ -55,7 +47,9 @@ public class TodoListService {
                 .orElseThrow(() -> new RuntimeException("no lists found"));
 
         return todoLists.stream().map(TodoListResponse::fromEntity).toList();
+
     }
+
 
     public Boolean deleteListItem(UUID todoId) {
         if (!todoListRepository.existsById(todoId)) {

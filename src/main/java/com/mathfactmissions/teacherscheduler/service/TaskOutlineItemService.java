@@ -7,25 +7,18 @@ import com.mathfactmissions.teacherscheduler.model.TaskOutlineItem;
 import com.mathfactmissions.teacherscheduler.repository.TaskOutlineItemRepository;
 import com.mathfactmissions.teacherscheduler.repository.TaskRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class TaskOutlineItemService {
 
     private final TaskOutlineItemRepository taskOutlineItemRepository;
     private final TaskRepository taskRepository;
-
-    // Constructor injection — no @Autowired needed
-    public TaskOutlineItemService(
-            TaskOutlineItemRepository taskOutlineItemRepository,
-            TaskRepository taskRepository
-    ) {
-        this.taskOutlineItemRepository = taskOutlineItemRepository;
-        this.taskRepository = taskRepository;
-    }
 
     public TaskOutlineResponse addTaskOutlineItem(
             UUID taskId,

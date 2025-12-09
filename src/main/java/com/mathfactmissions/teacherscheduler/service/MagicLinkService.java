@@ -17,7 +17,6 @@ public class MagicLinkService {
     private final EmailService emailService;
     private final String clientURL;
 
-    @Autowired
     public MagicLinkService(
             JwtService jwtService,
             EmailService emailService,

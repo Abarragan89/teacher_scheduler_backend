@@ -5,33 +5,18 @@ import com.mathfactmissions.teacherscheduler.model.Role;
 import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.repository.RoleRepository;
 import com.mathfactmissions.teacherscheduler.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     public final UserRepository userRepository;
     private final RoleRepository roleRepository;
-
-    @Autowired
-    public UserService(
-            UserRepository userRepository,
-            RoleRepository roleRepository
-    ) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-    }
-
-    public List<User> findAll() {
-        return userRepository.findAll();
-    }
-
 
     public User createUser(String email) {
         if (userRepository.existsByEmail(email)) {

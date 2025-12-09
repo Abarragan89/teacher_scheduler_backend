@@ -3,6 +3,7 @@ package com.mathfactmissions.teacherscheduler.service;
 import com.mathfactmissions.teacherscheduler.model.PushSubscription;
 import com.mathfactmissions.teacherscheduler.repository.PushSubscriptionRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,16 +11,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class PushSubscriptionService {
 
     private final PushSubscriptionRepository pushSubscriptionRepository;
-
-    public PushSubscriptionService(
-            PushSubscriptionRepository pushSubscriptionRepository
-    ) {
-      this.pushSubscriptionRepository = pushSubscriptionRepository;
-    }
-
 
     public PushSubscription saveSubscription(String endpoint, String p256dhKey, String authKey, UUID userId) {
         // Check if subscription already exists

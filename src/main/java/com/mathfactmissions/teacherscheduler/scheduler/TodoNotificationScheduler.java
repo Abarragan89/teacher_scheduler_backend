@@ -51,6 +51,67 @@ public class TodoNotificationScheduler {
         }
     }
 
+
+
+//    @Scheduled(fixedRate = 30000)
+//    public void checkDueTodos() {
+//        Instant now = Instant.now();
+//        Instant tenMinutesFromNow = now.plus(10, ChronoUnit.MINUTES);
+//
+//        // 1. One-time todos (unchanged)
+//        List<Todo> singleTodos =
+//        todoRepository.findTodosDueBetween(now, tenMinutesFromNow);
+//
+//        singleTodos.forEach(this::notifyOnce);
+//
+//        // 2. Recurring todos (compute window)
+//        List<Todo> recurringTodos =
+//        todoRepository.findAllByIsRecurringTrue();
+//
+//        for (Todo todo : recurringTodos) {
+//            RecurrencePattern pattern = todo.getRecurrencePattern();
+//            ZoneId zone = ZoneId.of(pattern.getTimeZone());
+//
+//            // Convert UTC window to LOCAL window of the recurrence
+//            LocalDate windowStart =
+//            now.atZone(zone).toLocalDate();
+//            LocalDate windowEnd =
+//            tenMinutesFromNow.atZone(zone).toLocalDate();
+//
+//            List<LocalDate> dates =
+//            calculateOccurrences(pattern, windowStart, windowEnd);
+//
+//            for (LocalDate date : dates) {
+//                Instant occurrenceInstant =
+//                ZonedDateTime.of(date, pattern.getTimeOfDay(), zone)
+//                .toInstant();
+//
+//                if (!occurrenceInstant.isBefore(now)
+//                && !occurrenceInstant.isAfter(tenMinutesFromNow)) {
+//
+//                    pushNotificationService.sendTodoDueNotification(todo, occurrenceInstant);
+//                }
+//            }
+//        }
+//    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * Check for overdue todos that haven't been notified yet
      * Runs every hour to catch overdue items

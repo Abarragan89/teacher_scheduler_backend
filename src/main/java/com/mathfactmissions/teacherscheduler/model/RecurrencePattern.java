@@ -6,11 +6,15 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.Instant;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @Builder
@@ -26,6 +30,14 @@ public class RecurrencePattern {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RecurrenceType type;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "todo_list_id", nullable = false)
+    private TodoList todoList;
 
     // Weekly fields
     @Column(name="days_of_week")
@@ -54,6 +66,9 @@ public class RecurrencePattern {
 
     @Column(name="time_of_day", nullable = false)
     private LocalTime timeOfDay;
+
+    @Column(name = "time_zone", nullable = false)
+    private ZoneId timeZone;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)

@@ -10,6 +10,7 @@ import com.mathfactmissions.teacherscheduler.model.Task;
 import com.mathfactmissions.teacherscheduler.model.TaskOutlineItem;
 import com.mathfactmissions.teacherscheduler.repository.TaskRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,29 +21,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class TaskService {
 
     private final TaskRepository taskRepository;
     private final ScheduleService scheduleService;
     private final DayService dayService;
 
-    public TaskService(
-            TaskRepository taskRepository,
-            ScheduleService scheduleService,
-            DayService dayService
-    ) {
-        this.taskRepository = taskRepository;
-        this.scheduleService = scheduleService;
-        this.dayService = dayService;
-    }
-
-    public Task findById(UUID id) {
-        return taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
-    }
-
     public TaskResponse addTask(UUID scheduleId, Integer position) {
-
         // Find parent schedule
         Schedule schedule = scheduleService.findById(scheduleId);
 
