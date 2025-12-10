@@ -11,4 +11,7 @@ public interface TodoListRepository extends JpaRepository<TodoList, UUID> {
 
 
     Optional<List<TodoList>> findAllByUserOrderByUpdatedAtDesc(User user);
+
+
+    Optional<TodoList> findByIdAndUser_Id(UUID id, UUID userId);
 }

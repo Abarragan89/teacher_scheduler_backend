@@ -16,7 +16,9 @@ public record CreateRecurrencePatternRequest(
         String monthPatternType,
         List<String> selectedMonthDays,
         NthWeekday nthWeekday,
-        LocalDate yearlyDate
+        LocalDate yearlyDate,
+        LocalDate startDate,
+        LocalDate endDate
 
 ) {
     public record NthWeekday(Integer nth, Integer weekday) {}

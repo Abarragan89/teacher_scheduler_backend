@@ -1,6 +1,5 @@
 package com.mathfactmissions.teacherscheduler.service;
 
-import com.mathfactmissions.teacherscheduler.dto.recurringTodos.request.CreateRecurrencePatternRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.request.CreateTodoRequest;
 import com.mathfactmissions.teacherscheduler.model.RecurrencePattern;
 import com.mathfactmissions.teacherscheduler.model.TodoList;
@@ -8,6 +7,7 @@ import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.repository.RecurrencePatternRepository;
 import com.mathfactmissions.teacherscheduler.enums.RecurrenceType;
 import com.mathfactmissions.teacherscheduler.enums.MonthPatternType;
+import com.mathfactmissions.teacherscheduler.repository.TodoListRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,79 +24,55 @@ public class RecurrencePatternService {
 
     private final RecurrencePatternRepository recurrencePatternRepository;
     private final UserService userService;
-    private final TodoListService todoListService;
+    private final TodoListRepository todoListRepository;
 
     @Transactional
     public RecurrencePattern createRecurrencePattern(CreateTodoRequest request, UUID userId) {
-        // 1. Load User (managed entity)
-        User user = userService.findById(userId)
-        .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 2. Load TodoList (and validate ownership)
-        TodoList todoList = todoListService
-            .findByIdAndUserId(request.todoListId(), userId)
+        User user = userService.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+        TodoList todoList = todoListRepository
+            .findByIdAndUser_Id(request.todoListId(), userId)
             .orElseThrow(() -> new RuntimeException("Todo list not found or not owned"));
 
-        // 3. Build the recurrence pattern
         RecurrencePattern pattern = RecurrencePattern.builder()
-        .type(RecurrenceType.valueOf(
-        request.recurrencePattern().recurrenceType().toUpperCase()
-        ))
-        .timeOfDay(LocalTime.parse(
-        request.recurrencePattern().time()
-        ))
-        .timeZone(request.recurrencePattern().timeZone())
+            .type(RecurrenceType.valueOf(request.recurrencePattern().recurrenceType().toUpperCase()))
+            .timeOfDay(LocalTime.parse(request.recurrencePattern().time()))
+            .timeZone(request.recurrencePattern().timeZone())
+            .startDate(request.recurrencePattern().startDate())
+            .endDate(request.recurrencePattern().endDate())
+            .user(user)
+            .todoList(todoList)
+            .build();
 
-        // ✅ REQUIRED
-        .user(user)
-        .todoList(todoList)
-
-        // Optional rule fields
-        .daysOfWeek(request.recurrencePattern().daysOfWeek())
-        .monthPatternType(request.recurrencePattern().monthPatternType())
-        .daysOfMonth(request.recurrencePattern().daysOfMonth())
-        .nthWeekdayOccurrence(request.recurrencePattern().nthWeekdayOccurrence())
-        .nthWeekdayDay(request.recurrencePattern().nthWeekdayDay())
-        .yearlyMonth(request.recurrencePattern().yearlyMonth())
-        .yearlyDay(request.recurrencePattern().yearlyDay())
-
-        .build();
-    }
-
-    private RecurrencePattern buildRecurrencePattern(CreateRecurrencePatternRequest request) {
-
-        RecurrencePattern.RecurrencePatternBuilder builder = RecurrencePattern.builder()
-            .type(RecurrenceType.valueOf(request.recurrenceType().toUpperCase()))
-            .timeOfDay(LocalTime.parse(request.time()))
-            .timeZone(request.timeZone())
-            .createdAt(Instant.now())
-            .updatedAt(Instant.now());
-
-        switch (request.recurrenceType().toUpperCase()) {
-            case "WEEKLY":
-                builder.daysOfWeek(String.join(",", request.selectedDays()));
+        // Set up the recurrence pattern rules based on patternType
+        switch (pattern.getType()) {
+            case WEEKLY:
+                pattern.setDaysOfWeek(String.join(",", request.recurrencePattern().selectedDays()));
                 break;
-            case "MONTHLY":
-                if ("BY_DATE".equals(request.monthPatternType())) {
-                    builder.monthPatternType(MonthPatternType.BY_DATE)
-                    .daysOfMonth(String.join(",", request.selectedMonthDays()));
+            case MONTHLY:
+                if ("BY_DATE".equals(request.recurrencePattern().monthPatternType())) {
+                    pattern.setMonthPatternType(MonthPatternType.BY_DATE);
+                    pattern.setDaysOfMonth(
+                    String.join(",", request.recurrencePattern().selectedMonthDays())
+                    );
                 } else {
-                    builder.monthPatternType(MonthPatternType.BY_DAY)
-                    .nthWeekdayOccurrence(request.nthWeekday().nth())
-                    .nthWeekdayDay(request.nthWeekday().weekday());
+                    pattern.setMonthPatternType(MonthPatternType.BY_DAY);
+                    pattern.setNthWeekdayOccurrence(request.recurrencePattern().nthWeekday().nth());
+                    pattern.setNthWeekdayDay(request.recurrencePattern().nthWeekday().weekday());
                 }
                 break;
-            case "YEARLY":
-                LocalDate yearlyDate = request.yearlyDate();
-                builder.yearlyMonth(yearlyDate.getMonthValue())
-                .yearlyDay(yearlyDate.getDayOfMonth());
+            case YEARLY:
+                LocalDate yearlyDate = request.recurrencePattern().yearlyDate();
+                pattern.setYearlyMonth(yearlyDate.getMonthValue());
+                pattern.setYearlyDay(yearlyDate.getDayOfMonth());
                 break;
-            case "DAILY":
+            case DAILY:
             default:
-                // No extra fields needed
                 break;
         }
-        return builder.build();
+        return recurrencePatternRepository.save(pattern);
     }
 
 
