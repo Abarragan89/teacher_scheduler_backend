@@ -5,7 +5,6 @@ import com.mathfactmissions.teacherscheduler.model.*;
 import com.mathfactmissions.teacherscheduler.repository.DayRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.Set;
@@ -20,8 +19,8 @@ public class DayService {
     private final UserService userService;
     private final ScheduleService scheduleService;
 
-    public DayResponse findSingleDay(UUID dayId){
-        Day day = dayRepository.findById(dayId)
+    public DayResponse findSingleDay(UUID dayId, UUID userId){
+        Day day = dayRepository.findByIdAndUser_Id(dayId, userId)
                 .orElseThrow(() -> new RuntimeException("No Day found"));
         return DayResponse.fromEntity(day);
     }
@@ -34,7 +33,7 @@ public class DayService {
     }
 
     @Transactional
-    public DayResponse createOrFindDayWithSchedule(UUID userId, LocalDate dayDate, UUID scheduleId) {
+    public void createOrFindDayWithSchedule(UUID userId, LocalDate dayDate, UUID scheduleId) {
 
         // Find or create the Day
         Day targetDay = dayRepository.findByUser_IdAndDayDate(userId, dayDate)
@@ -94,9 +93,6 @@ public class DayService {
 
         // Save (assuming cascade persist)
         dayRepository.save(targetDay);
-
-        // Return
-        return DayResponse.fromEntity(targetDay);
     }
 
 

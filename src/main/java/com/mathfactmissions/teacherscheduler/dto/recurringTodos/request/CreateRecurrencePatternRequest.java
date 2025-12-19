@@ -2,25 +2,27 @@ package com.mathfactmissions.teacherscheduler.dto.recurringTodos.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
 @Builder
 public record CreateRecurrencePatternRequest(
-
-        @NotBlank(message = "Recurrence type is required") String recurrenceType,
-        @NotBlank(message = "Time is required") String time,
-        @NotBlank(message = "Time Zone Required") ZoneId timeZone,
-        List<String> selectedDays,
-        String monthPatternType,
-        List<String> selectedMonthDays,
-        NthWeekday nthWeekday,
-        LocalDate yearlyDate,
-        LocalDate startDate,
-        LocalDate endDate
+    
+    @NotBlank(message = "Recurrence type is required") String type,
+    @NotBlank(message = "Time is required") String timeOfDay,
+    @NotBlank(message = "Time Zone Required") ZoneId timeZone,
+    List<String> daysOfWeek,
+    String monthPatternType,
+    List<String> daysOfMonth,
+    NthWeekdayOccurrence nthWeekdayOccurrence,
+    LocalDate yearlyDate,
+    LocalDate startDate,
+    LocalDate endDate
 
 ) {
-    public record NthWeekday(Integer nth, Integer weekday) {}
-
+    public record NthWeekdayOccurrence(Integer ordinal, Integer weekday) {
+    }
+    
 }

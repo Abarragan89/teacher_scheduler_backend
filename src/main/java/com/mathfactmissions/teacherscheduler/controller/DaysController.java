@@ -29,8 +29,11 @@ public class DaysController {
     }
 
     @GetMapping("/single-day/{dayId}")
-    public ResponseEntity<DayResponse> findDay(@PathVariable UUID dayId) {
-         DayResponse day =  dayService.findSingleDay(dayId);
+    public ResponseEntity<DayResponse> findDay(
+        @PathVariable UUID dayId,
+        @AuthenticationPrincipal UserPrincipal userInfo
+    ) {
+         DayResponse day =  dayService.findSingleDay(dayId, userInfo.getId());
          return ResponseEntity.ok(day);
     }
 

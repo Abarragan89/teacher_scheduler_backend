@@ -35,12 +35,12 @@ public class TaskOutlineItemController {
     @PostMapping("/create")
     public TaskOutlineResponse createTaskOutline(@Valid @RequestBody TaskOutlineRequest request
     ) {
-            return taskOutlineItemService.addTaskOutlineItem(
-                    request.taskId(),
-                    request.position(),
-                    request.indentLevel(),
-                    request.text()
-            );
+        return taskOutlineItemService.addTaskOutlineItem(
+                request.taskId(),
+                request.position(),
+                request.indentLevel(),
+                request.text()
+        );
     }
 
     @PutMapping("/toggle-complete")

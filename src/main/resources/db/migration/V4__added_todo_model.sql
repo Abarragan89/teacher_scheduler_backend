@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS todo_lists (
 CREATE TABLE IF NOT EXISTS recurrence_pattern (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     type VARCHAR(20) NOT NULL, -- 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'
-
+    text TEXT NOT NULL,
     -- Weekly fields
     days_of_week VARCHAR(20), -- 1, 3, 5 for Mon/Wed/Fri
 

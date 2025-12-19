@@ -39,6 +39,9 @@ public class RecurrencePattern {
     @JoinColumn(name = "todo_list_id", nullable = false)
     private TodoList todoList;
 
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String text;
+
     // Weekly fields
     @Column(name="days_of_week")
     private String daysOfWeek;

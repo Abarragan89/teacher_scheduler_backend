@@ -30,9 +30,9 @@ public class TodoListService {
     }
 
 
-    public TodoList updateListTitle(UUID todoListId, String listName) {
+    public TodoList updateListTitle(UUID todoListId, String listName, UUID userId) {
 
-        TodoList currentList = todoListRepository.findById(todoListId)
+        TodoList currentList = todoListRepository.findByIdAndUser_Id(todoListId, userId)
                 .orElseThrow(() -> new RuntimeException("No List Found"));
 
         currentList.setListName(listName);
@@ -51,8 +51,8 @@ public class TodoListService {
     }
 
 
-    public Boolean deleteListItem(UUID todoId) {
-        if (!todoListRepository.existsById(todoId)) {
+    public Boolean deleteListItem(UUID todoId, UUID userId) {
+        if (!todoListRepository.existsByIdAndUser_Id(todoId, userId)) {
             return false; // nothing to delete
         }
 
@@ -64,8 +64,6 @@ public class TodoListService {
         User user = userService.findById(userId)
                 .orElseThrow(() -> new RuntimeException("no user found"));
 
-        Optional<List<TodoList>> userLists = todoListRepository.findAllByUserOrderByUpdatedAtDesc(user);
-
         todoListRepository.findAllByUserOrderByUpdatedAtDesc(user)
             .ifPresent(lists ->
                 lists.forEach(todoList -> {
@@ -75,9 +73,4 @@ public class TodoListService {
             );
         return true;
     }
-
-    public Optional<TodoList> findById(UUID todoListId) {
-        return todoListRepository.findById(todoListId);
-    }
-
 }

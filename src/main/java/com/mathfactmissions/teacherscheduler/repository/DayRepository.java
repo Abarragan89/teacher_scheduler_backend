@@ -12,5 +12,6 @@ public interface DayRepository extends JpaRepository<Day, UUID> {
     @EntityGraph(attributePaths = {"schedule", "schedule.tasks", "schedule.tasks.outlineItems"})
     Optional<Day> findByUser_IdAndDayDate(UUID userId, LocalDate dayDate);
 
+    Optional<Day> findByIdAndUser_Id(UUID id, UUID userId);
 
 }

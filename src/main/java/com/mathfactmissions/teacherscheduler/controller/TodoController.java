@@ -3,7 +3,6 @@ package com.mathfactmissions.teacherscheduler.controller;
 import com.mathfactmissions.teacherscheduler.dto.todo.request.CreateTodoRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.request.UpdateTodoRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.response.TodoResponse;
-import com.mathfactmissions.teacherscheduler.model.RecurrencePattern;
 import com.mathfactmissions.teacherscheduler.security.UserPrincipal;
 import com.mathfactmissions.teacherscheduler.service.RecurrencePatternService;
 import com.mathfactmissions.teacherscheduler.service.TodoService;
@@ -12,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -34,10 +36,10 @@ public class TodoController {
     ) {
         try {
             if (request.isRecurring()) {
-                RecurrencePattern newPattern = recurrencePatternService.createRecurrencePattern(request, userInfo.getId());
-                return ResponseEntity.ok(newPattern);
+                List<TodoResponse> generatedTodos = recurrencePatternService.createRecurrencePattern(request, userInfo.getId());
+                return ResponseEntity.ok(generatedTodos);
             } else {
-                TodoResponse newTodo = todoService.createTodoItem(request);
+                TodoResponse newTodo = todoService.createTodoItem(request, userInfo.getId());
                 return ResponseEntity.ok(newTodo);
             }
         } catch (Exception e) {
@@ -47,7 +49,10 @@ public class TodoController {
     }
 
     @PutMapping("/update-list-item")
-    public ResponseEntity<TodoResponse> updateListItem(@Valid @RequestBody UpdateTodoRequest request) {
+    public ResponseEntity<TodoResponse> updateListItem(
+        @Valid @RequestBody UpdateTodoRequest request,
+        @AuthenticationPrincipal UserPrincipal userInfo
+    ) {
 
         TodoResponse updatedTodo = todoService.updateTodoItem(
                 request.todoId(),
@@ -55,25 +60,24 @@ public class TodoController {
                 request.completed(),
                 request.priority(),
                 request.dueDate(),
-                request.todoListId()
+                request.todoListId(),
+                userInfo.getId()
         );
 
         return ResponseEntity.ok(updatedTodo);
     }
 
-//    @GetMapping("/get-recurring-todos-in-range/{startDate}/{endDate}")
-//    public ResponseEntity<List<RecurringTodoView>> getRecurringTodosInRange(@PathVariable LocalDate startDate, @PathVariable LocalDate endDate) {
-//        UserPrincipal user = (UserPrincipal) SecurityContextHolder
-//            .getContext()
-//            .getAuthentication()
-//            .getPrincipal();
-//        UUID userId = user.getId();
-//
-//        List<RecurringTodoView> recurring = todoService.getRecurringTodosInRange(userId, startDate, endDate);
-//
-//        return ResponseEntity.ok(recurring);
-//
-//    }
+    @GetMapping("/get-recurring-todos-in-range/{startDate}/{endDate}")
+    public ResponseEntity<List<TodoResponse>> getRecurringTodosInRange(
+        @PathVariable LocalDate startDate,
+        @PathVariable LocalDate endDate,
+        @AuthenticationPrincipal UserPrincipal userInfo
+
+    ) {
+        List<TodoResponse> recurring = todoService.getRecurringTodosInRange(userInfo.getId(), startDate, endDate);
+        return ResponseEntity.ok(recurring);
+
+    }
 
 
     @DeleteMapping("/delete-list-item/{todoId}")
