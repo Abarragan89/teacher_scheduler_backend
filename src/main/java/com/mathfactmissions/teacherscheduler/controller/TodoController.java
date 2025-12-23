@@ -20,15 +20,15 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/todo")
 public class TodoController {
-
+    
     public final TodoService todoService;
     public final RecurrencePatternService recurrencePatternService;
-
+    
     public TodoController(TodoService todoService, RecurrencePatternService recurrencePatternService) {
         this.todoService = todoService;
         this.recurrencePatternService = recurrencePatternService;
     }
-
+    
     @PostMapping("/create-list-item")
     public ResponseEntity<?> createListItem(
         @Valid @RequestBody CreateTodoRequest request,
@@ -47,56 +47,57 @@ public class TodoController {
             throw e;
         }
     }
-
+    
     @PutMapping("/update-list-item")
     public ResponseEntity<TodoResponse> updateListItem(
         @Valid @RequestBody UpdateTodoRequest request,
         @AuthenticationPrincipal UserPrincipal userInfo
     ) {
-
+        
         TodoResponse updatedTodo = todoService.updateTodoItem(
-                request.todoId(),
-                request.todoText(),
-                request.completed(),
-                request.priority(),
-                request.dueDate(),
-                request.todoListId(),
-                userInfo.getId()
+            request.todoId(),
+            request.todoText(),
+            request.completed(),
+            request.priority(),
+            request.dueDate(),
+            request.todoListId(),
+            userInfo.getId()
         );
-
+        
         return ResponseEntity.ok(updatedTodo);
     }
-
+    
     @GetMapping("/get-recurring-todos-in-range/{startDate}/{endDate}")
     public ResponseEntity<List<TodoResponse>> getRecurringTodosInRange(
         @PathVariable LocalDate startDate,
         @PathVariable LocalDate endDate,
         @AuthenticationPrincipal UserPrincipal userInfo
-
+    
     ) {
+        System.out.println("start Date in controller " + startDate);
+        System.out.println("End Date in controller " + endDate);
         List<TodoResponse> recurring = todoService.getRecurringTodosInRange(userInfo.getId(), startDate, endDate);
         return ResponseEntity.ok(recurring);
-
+        
     }
-
-
+    
+    
     @DeleteMapping("/delete-list-item/{todoId}")
     public ResponseEntity<String> deleteListItem(@PathVariable UUID todoId) {
         try {
-        boolean deleted = todoService.deleteListItem(todoId);
-
-        if (!deleted) {
-            return ResponseEntity.ok("Todo deleted");
-        }
-
-        } catch(Exception e) {
+            boolean deleted = todoService.deleteListItem(todoId);
+            
+            if (!deleted) {
+                return ResponseEntity.ok("Todo deleted");
+            }
+            
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Failed to delete todos");
+                .body("Failed to delete todos");
         }
-
+        
         return ResponseEntity.noContent().build(); // 204 No Content
     }
-
-
-
+    
+    
 }

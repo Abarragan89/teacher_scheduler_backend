@@ -1,9 +1,6 @@
 package com.mathfactmissions.teacherscheduler.controller;
 
 import com.mathfactmissions.teacherscheduler.dto.magicLink.request.MagicLinkRequest;
-import com.mathfactmissions.teacherscheduler.dto.user.request.CreateUserRequest;
-import com.mathfactmissions.teacherscheduler.dto.user.response.UserResponse;
-import com.mathfactmissions.teacherscheduler.dto.user.response.UserWithIdResponse;
 import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.security.JwtService;
 import com.mathfactmissions.teacherscheduler.service.MagicLinkService;
@@ -27,184 +24,183 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-
-   private final JwtService jwtService;
-   private final UserService userService;
-   private final MagicLinkService magicLinkService;
-   private final TodoListService todoListService;
-
-   @Autowired
+    
+    private final JwtService jwtService;
+    private final UserService userService;
+    private final MagicLinkService magicLinkService;
+    private final TodoListService todoListService;
+    
+    @Autowired
     public AuthController(
-            JwtService jwtService,
-            UserService userService,
-            MagicLinkService magicLinkService,
-            TodoListService todoListService
-   ) {
-       this.jwtService = jwtService;
-       this.userService = userService;
-       this.magicLinkService = magicLinkService;
-       this.todoListService = todoListService;
-   }
-
+        JwtService jwtService,
+        UserService userService,
+        MagicLinkService magicLinkService,
+        TodoListService todoListService
+    ) {
+        this.jwtService = jwtService;
+        this.userService = userService;
+        this.magicLinkService = magicLinkService;
+        this.todoListService = todoListService;
+    }
+    
     @PostMapping("/magic-link-request")
     public ResponseEntity<?> requestMagicLink(
-            @Valid @RequestBody MagicLinkRequest dto
+        @Valid @RequestBody MagicLinkRequest dto
     ) throws JOSEException {
-
+        
         magicLinkService.sendMagicLink(dto.email());
-
+        
         return ResponseEntity.ok(Map.of(
-                "message", "Magic link sent",
-                "email", dto.email()
+            "message", "Magic link sent",
+            "email", dto.email()
         ));
     }
-
+    
     @PostMapping("/magic-link-verify")
     public ResponseEntity<?> verifyMagicLink(
-            @RequestBody Map<String, String> body
+        @RequestBody Map<String, String> body
     )
-            throws JOSEException, ParseException {
-
+        throws JOSEException, ParseException {
+        
         // Get magic token from request
         String magicToken = body.get("token");
-
+        
         JWTClaimsSet magicClaims = jwtService.validateToken(magicToken);
-
+        
         if (magicClaims.getBooleanClaim("magic") == null || !magicClaims.getBooleanClaim("magic")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
+        
         // Find user by email
         String email = magicClaims.getSubject();
-
+        
         User user = userService.findOrCreateUser(email);
-
+        
         if (!user.isInitialized()) {
             todoListService.createNewList(user.getId(), "Unlisted");
             user.setInitialized(true);
             userService.save(user);
         }
-
-
+        
+        
         // Build claims for access token
         Map<String, Object> accessClaims = new HashMap<>();
         accessClaims.put("roles", user.getRoles());
         accessClaims.put("user_id", user.getId());
-
+        
         // Generate real tokens
         String accessToken = jwtService.generateToken(user.getEmail(), accessClaims, 15); // 15 minute expiration
         String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("type", "refresh"), 43200); // 30 day expiration
-
+        
         // Cookies
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
 //                .domain("teachforfree.com")
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .path("/")
-                .maxAge(900) // 15 min
-                .build();
-
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("None")
+            .path("/")
+            .maxAge(900) // 15 min
+            .build();
+        
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
 //                .domain("teachforfree.com")
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .path("/")
-                .maxAge(2592000) // 30 days
-                .build();
-
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("None")
+            .path("/")
+            .maxAge(2592000) // 30 days
+            .build();
+        
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(Map.of("message", "Link Verified"));
+            .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+            .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+            .body(Map.of("message", "Link Verified"));
     }
-
-
-
+    
+    
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@CookieValue(name="refresh_token") String refreshToken) throws JOSEException, ParseException {
-
-       // Validate refresh token
+    public ResponseEntity<?> refreshToken(@CookieValue(name = "refresh_token") String refreshToken) throws JOSEException, ParseException {
+        
+        // Validate refresh token
         JWTClaimsSet claims = jwtService.validateToken(refreshToken);
-
+        
         // Get user email
         String email = claims.getSubject();
-
+        
         // Look up user
         User user = userService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
         // Build new access token with queried roles
         Map<String, Object> accessClaims = new HashMap<>();
         accessClaims.put("roles", user.getRoles());
         accessClaims.put("user_id", user.getId());
-
+        
         // Create new access token
         String newAccessToken = jwtService.generateToken(email, accessClaims, 15);
-
+        
         ResponseCookie newAccessCookie = ResponseCookie.from("access_token", newAccessToken)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .path("/")
-                .maxAge(900) // 15 min
-                .build();
-
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("None")
+            .path("/")
+            .maxAge(900) // 15 min
+            .build();
+        
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
-                .body(Map.of("message", "Token refreshed"));
-
+            .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
+            .body(Map.of("message", "Token refreshed"));
+        
     }
-
+    
     @GetMapping("/session")
     public ResponseEntity<?> verifySession(
-            @CookieValue(name="access_token", required = false) String accessToken
+        @CookieValue(name = "access_token", required = false) String accessToken
     ) {
-       if (accessToken == null) {
+        if (accessToken == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("authenticated", false));
+                .body(Map.of("authenticated", false));
         }
-
+        
         try {
             JWTClaimsSet claims = jwtService.validateToken(accessToken);
-
+            
             return ResponseEntity.ok(Map.of(
-                    "authenticated", true,
-                    "email", claims.getSubject(),
-                    "roles", claims.getClaim("roles"),
-                    "message", "session verified")
+                "authenticated", true,
+                "email", claims.getSubject(),
+                "roles", claims.getClaim("roles"),
+                "message", "session verified")
             );
-
+            
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("authenticated", false));
+                .body(Map.of("authenticated", false));
         }
     }
-
+    
     @PostMapping("/logout")
     public ResponseEntity<?> logoutUser(HttpServletResponse response) {
         // Clear access token cookie
         ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", "")
 //                .domain("teachforfree.com")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(0) // expire immediately
-                .build();
-
+            .httpOnly(true)
+            .secure(true)
+            .path("/")
+            .maxAge(0) // expire immediately
+            .build();
+        
         // Clear refresh token cookie
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", "")
 //                .domain("teachforfree.com")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(0)
-                .build();
-
+            .httpOnly(true)
+            .secure(true)
+            .path("/")
+            .maxAge(0)
+            .build();
+        
         response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
-
+        
         return ResponseEntity.ok("Logged out successfully");
     }
 }
