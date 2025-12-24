@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @Builder
 public record RecurrencePatternResponse(
     UUID id,
+    UUID todoListId,
     String type,              // DAILY, WEEKLY, MONTHLY, YEARLY
     String text,
     List<Integer> daysOfWeek,        // ex: [1, 3, 5]
@@ -33,6 +34,9 @@ public record RecurrencePatternResponse(
         
         return RecurrencePatternResponse.builder()
             .id(rp.getId())
+            .todoListId(
+                rp.getTodoList() != null ? rp.getTodoList().getId() : null
+            )
             .type(rp.getType().name())
             .text(rp.getText())
             .daysOfWeek(parseCsvToIntList(rp.getDaysOfWeek()))

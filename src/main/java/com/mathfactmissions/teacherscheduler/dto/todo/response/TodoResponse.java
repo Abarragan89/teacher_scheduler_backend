@@ -21,6 +21,7 @@ public record TodoResponse(
         return TodoResponse.builder()
             .id(todo.getId())
             .dueDate(todo.getDueDate())
+            
             .isRecurring(todo.getRecurrencePattern() != null)
             .recurrencePattern(RecurrencePatternResponse.fromEntity(todo.getRecurrencePattern()))
             .text(todo.getText())
