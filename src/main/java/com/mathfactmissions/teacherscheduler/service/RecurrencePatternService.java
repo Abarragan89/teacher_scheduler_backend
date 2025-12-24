@@ -76,12 +76,20 @@ public class RecurrencePatternService {
             default:
                 break;
         }
-        RecurrencePattern savedPattern = recurrencePatternRepository.save(pattern);
+        recurrencePatternRepository.save(pattern);
         
         LocalDate from = pattern.getStartDate();
-        LocalDate to = from.plusMonths(2);
+        
+        LocalDate to = resolveInitialGenerationEnd(pattern);
         return todoService.generateMissingTodosForPattern(pattern, from, to, request.todoText());
-        
-        
     }
+    
+    private LocalDate resolveInitialGenerationEnd(RecurrencePattern pattern) {
+        LocalDate cap = pattern.getStartDate().plusMonths(2);
+        
+        return pattern.getEndDate() != null && !pattern.getEndDate().isAfter(cap)
+            ? pattern.getEndDate()
+            : cap;
+    }
+    
 }

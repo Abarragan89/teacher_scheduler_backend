@@ -139,7 +139,8 @@ public class TodoService {
     
     // End-exclusive instant = start of (to + 1 day)
     private Instant endExclusiveOfDayInstant(LocalDate date, ZoneId zone) {
-        return date.plusDays(1).atStartOfDay(zone).toInstant();
+//        return date.plusDays(1).atStartOfDay(zone).toInstant();
+        return date.atStartOfDay(zone).toInstant();
     }
     
     public List<TodoResponse> getRecurringTodosInRange(
