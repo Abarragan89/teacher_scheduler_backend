@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController()
@@ -33,11 +34,12 @@ public class DaysController {
         return ResponseEntity.ok(day);
     }
     
-    @GetMapping("/single-day-public/{dayId}")
+    @GetMapping("/single-day-public/{userId}/{dateString}")
     public ResponseEntity<DayResponse> findDayPublic(
-        @PathVariable UUID dayId
+        @PathVariable UUID userId,
+        @PathVariable LocalDate dateString
     ) {
-        DayResponse day = dayService.findSingleDayPublic(dayId);
+        DayResponse day = dayService.findSingleDayPublic(userId, dateString);
         return ResponseEntity.ok(day);
     }
     

@@ -26,8 +26,8 @@ public class DayService {
         return DayResponse.fromEntity(day);
     }
     
-    public DayResponse findSingleDayPublic(UUID dayId) {
-        Day day = dayRepository.findById(dayId)
+    public DayResponse findSingleDayPublic(UUID userId, LocalDate dateString) {
+        Day day = dayRepository.findByUser_IdAndDayDate(userId, dateString)
             .orElseThrow(() -> new RuntimeException("No Day found"));
         return DayResponse.fromEntity(day);
     }

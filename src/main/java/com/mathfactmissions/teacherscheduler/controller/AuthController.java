@@ -94,7 +94,6 @@ public class AuthController {
         
         // Cookies
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)
-//                .domain("teachforfree.com")
             .httpOnly(true)
             .secure(true)
             .sameSite("None")
@@ -103,7 +102,6 @@ public class AuthController {
             .build();
         
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
-//                .domain("teachforfree.com")
             .httpOnly(true)
             .secure(true)
             .sameSite("None")
@@ -164,11 +162,13 @@ public class AuthController {
         
         try {
             JWTClaimsSet claims = jwtService.validateToken(accessToken);
+            System.out.println("claims " + claims);
             
             return ResponseEntity.ok(Map.of(
                 "authenticated", true,
                 "email", claims.getSubject(),
                 "roles", claims.getClaim("roles"),
+                "userId", claims.getClaim("user_id"),
                 "message", "session verified")
             );
             
