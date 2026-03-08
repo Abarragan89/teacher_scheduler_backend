@@ -6,18 +6,25 @@ import com.mathfactmissions.teacherscheduler.enums.MonthPatternType;
 import com.mathfactmissions.teacherscheduler.enums.RecurrenceType;
 import com.mathfactmissions.teacherscheduler.model.RecurrencePattern;
 import com.mathfactmissions.teacherscheduler.model.TodoList;
+import com.mathfactmissions.teacherscheduler.model.TodoOverride;
 import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.repository.RecurrencePatternRepository;
 import com.mathfactmissions.teacherscheduler.repository.TodoListRepository;
+import com.mathfactmissions.teacherscheduler.repository.TodoOverrideRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,7 +34,8 @@ public class RecurrencePatternService {
     private final RecurrencePatternRepository recurrencePatternRepository;
     private final UserService userService;
     private final TodoListRepository todoListRepository;
-    private final TodoService todoService;
+    private final TodoOverrideRepository todoOverrideRepository;
+    private final RecurrenceEngine recurrenceEngine;
     
     @Transactional
     public List<TodoResponse> createRecurrencePattern(CreateTodoRequest request, UUID userId) {
@@ -50,7 +58,6 @@ public class RecurrencePatternService {
             .todoList(todoList)
             .build();
         
-        // Set up the recurrence pattern rules based on patternType
         switch (pattern.getType()) {
             case WEEKLY:
                 pattern.setDaysOfWeek(String.join(",", request.recurrencePattern().daysOfWeek()));
@@ -58,9 +65,7 @@ public class RecurrencePatternService {
             case MONTHLY:
                 if ("BY_DATE".equals(request.recurrencePattern().monthPatternType())) {
                     pattern.setMonthPatternType(MonthPatternType.BY_DATE);
-                    pattern.setDaysOfMonth(
-                        String.join(",", request.recurrencePattern().daysOfMonth())
-                    );
+                    pattern.setDaysOfMonth(String.join(",", request.recurrencePattern().daysOfMonth()));
                 } else {
                     pattern.setMonthPatternType(MonthPatternType.BY_DAY);
                     pattern.setNthWeekdayOccurrence(request.recurrencePattern().nthWeekdayOccurrence().ordinal());
@@ -76,20 +81,96 @@ public class RecurrencePatternService {
             default:
                 break;
         }
+        
         recurrencePatternRepository.save(pattern);
         
-        LocalDate from = pattern.getStartDate();
+        // Use the view range from the request so the frontend gets exactly
+        // what it needs to render the month the user is currently viewing
+        LocalDate from = request.viewStartDate();
+        LocalDate to = request.viewEndDate();
         
-        LocalDate to = resolveInitialGenerationEnd(pattern);
-        return todoService.generateMissingTodosForPattern(pattern, from, to, request.todoText());
+        // If the pattern starts after the view start, use the pattern start date
+        if (pattern.getStartDate().isAfter(from)) {
+            from = pattern.getStartDate();
+        }
+        
+        // Respect pattern end date
+        if (pattern.getEndDate() != null && pattern.getEndDate().isBefore(to)) {
+            to = pattern.getEndDate();
+        }
+        
+        return computeOccurrencesInRange(pattern, from, to);
     }
     
-    private LocalDate resolveInitialGenerationEnd(RecurrencePattern pattern) {
-        LocalDate cap = pattern.getStartDate().plusMonths(2);
+    public List<TodoResponse> getRecurringTodosInRange(UUID userId, LocalDate from, LocalDate to) {
+        List<RecurrencePattern> patterns = recurrencePatternRepository.findByUserId(userId);
         
-        return pattern.getEndDate() != null && !pattern.getEndDate().isAfter(cap)
-            ? pattern.getEndDate()
-            : cap;
+        return patterns.stream()
+            .flatMap(pattern -> {
+                // Clamp range to pattern bounds
+                LocalDate effectiveFrom = from.isBefore(pattern.getStartDate())
+                    ? pattern.getStartDate() : from;
+                
+                LocalDate effectiveTo = pattern.getEndDate() != null && pattern.getEndDate().isBefore(to)
+                    ? pattern.getEndDate() : to;
+                
+                if (effectiveFrom.isAfter(effectiveTo)) return java.util.stream.Stream.empty();
+                
+                return computeOccurrencesInRange(pattern, effectiveFrom, effectiveTo).stream();
+            })
+            .toList();
     }
     
+    public List<TodoResponse> computeOccurrencesInRange(RecurrencePattern pattern, LocalDate from, LocalDate to) {
+        
+        Map<LocalDate, TodoOverride> overrides = todoOverrideRepository
+            .findByRecurrencePattern_IdAndOriginalDateBetween(pattern.getId(), from, to)
+            .stream()
+            .collect(Collectors.toMap(TodoOverride::getOriginalDate, o -> o));
+        
+        return recurrenceEngine.calculateOccurrences(pattern, from, to)
+            .stream()
+            .map(date -> {
+                TodoOverride override = overrides.get(date);
+                if (override != null && override.isDeleted()) return null;
+                if (override != null) return toOverrideResponse(override);
+                return toVirtualResponse(pattern, date);
+            })
+            .filter(Objects::nonNull)
+            .toList();
+    }
+    
+    private TodoResponse toVirtualResponse(RecurrencePattern pattern, LocalDate date) {
+        Instant dueDate = ZonedDateTime.of(date, pattern.getTimeOfDay(), pattern.getTimeZone())
+            .toInstant();
+        
+        return TodoResponse.builder()
+            .id("virtual_" + pattern.getId() + "_" + date)
+            .patternId(pattern.getId())
+            .text(pattern.getText())
+            .dueDate(dueDate)
+            .timeOfDay(pattern.getTimeOfDay())
+            .completed(false)
+            .isVirtual(true)
+            .build();
+    }
+    
+    private TodoResponse toOverrideResponse(TodoOverride override) {
+        RecurrencePattern pattern = override.getRecurrencePattern();
+        Instant dueDate = ZonedDateTime.of(
+            override.getOriginalDate(),
+            pattern.getTimeOfDay(),
+            pattern.getTimeZone()
+        ).toInstant();
+        
+        return TodoResponse.builder()
+            .id(override.getId().toString())
+            .patternId(pattern.getId())
+            .text(override.getCustomTitle() != null ? override.getCustomTitle() : pattern.getText())
+            .dueDate(dueDate)
+            .timeOfDay(pattern.getTimeOfDay())
+            .completed(override.isCompleted())
+            .isVirtual(false)
+            .build();
+    }
 }

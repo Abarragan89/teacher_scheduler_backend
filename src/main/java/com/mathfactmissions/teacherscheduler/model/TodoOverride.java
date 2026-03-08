@@ -7,47 +7,49 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-@Table(
-    name = "todo_lists",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "name"})
-    }
-)
-public class TodoList {
+@Table(name = "todo_overrides")
+public class TodoOverride {
     
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, updatable = false)
     private UUID id;
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pattern_id", nullable = false)
+    private RecurrencePattern recurrencePattern;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "todo_list_id", nullable = false)
+    private TodoList todoList;
+    
+    @Column(name = "original_date", nullable = false)
+    private LocalDate originalDate;
+    
+    @Column(columnDefinition = "TEXT")
+    private String customTitle;
     
     @Builder.Default
-    @OneToMany(mappedBy = "todoList", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("priority DESC")
-    private List<Todo> todos = new ArrayList<Todo>();
+    @Column(nullable = false)
+    private boolean completed = false;
     
     @Builder.Default
-    @Column(name = "is_default")
-    private Boolean isDefault = false;
+    @Column(nullable = false)
+    private boolean deleted = false;
     
-    @Column(name = "list_name", nullable = false)
-    private String listName;
+    @Builder.Default
+    @Column(name = "notification_sent", nullable = false)
+    private boolean notificationSent = false;
     
     @CreatedDate
     @Column(name = "created_at", updatable = false)
@@ -56,9 +58,4 @@ public class TodoList {
     @LastModifiedDate
     @Column(name = "updated_at")
     private Instant updatedAt;
-    
-    public UUID getUserId() {
-        return this.user != null ? this.user.getId() : null;
-    }
-    
 }

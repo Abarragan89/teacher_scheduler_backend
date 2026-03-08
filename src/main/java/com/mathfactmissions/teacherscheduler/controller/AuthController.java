@@ -182,7 +182,6 @@ public class AuthController {
     public ResponseEntity<?> logoutUser(HttpServletResponse response) {
         // Clear access token cookie
         ResponseCookie accessTokenCookie = ResponseCookie.from("access_token", "")
-//                .domain("teachforfree.com")
             .httpOnly(true)
             .secure(true)
             .path("/")
