@@ -33,4 +33,13 @@ public class RecurrencePatternController {
             )
         );
     }
+    
+    @GetMapping("/next-occurrences")
+    public ResponseEntity<List<TodoResponse>> getNextOccurrences(
+        @AuthenticationPrincipal UserPrincipal userInfo
+    ) {
+        return ResponseEntity.ok(
+            recurrencePatternService.getNextOccurrenceForEachPattern(userInfo.getId())
+        );
+    }
 }

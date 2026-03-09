@@ -149,6 +149,7 @@ public class RecurrencePatternService {
             .patternId(pattern.getId())
             .text(pattern.getText())
             .dueDate(dueDate)
+            .listId(pattern.getTodoList().getId())
             .timeOfDay(pattern.getTimeOfDay())
             .completed(false)
             .isVirtual(true)
@@ -172,5 +173,58 @@ public class RecurrencePatternService {
             .completed(override.isCompleted())
             .isVirtual(false)
             .build();
+    }
+    
+    public List<TodoResponse> getNextOccurrenceForEachPattern(UUID userId) {
+        List<RecurrencePattern> patterns = recurrencePatternRepository.findByUserId(userId);
+        LocalDate today = LocalDate.now();
+        
+        return patterns.stream()
+            .map(pattern -> {
+                // Don't show patterns that have already ended
+                if (pattern.getEndDate() != null && pattern.getEndDate().isBefore(today)) {
+                    return null;
+                }
+                
+                LocalDate to = today.plusMonths(3); // look up to 3 months ahead for next occurrence
+                
+                // Respect pattern end date
+                if (pattern.getEndDate() != null && pattern.getEndDate().isBefore(to)) {
+                    to = pattern.getEndDate();
+                }
+                
+                // Get the next occurrence date
+                List<LocalDate> occurrences = recurrenceEngine.calculateOccurrences(pattern, today, to);
+                if (occurrences.isEmpty()) return null;
+                
+                LocalDate nextDate = occurrences.get(0); // first upcoming occurrence
+                
+                // Check if there's an override for this date
+                TodoOverride override = todoOverrideRepository
+                    .findByRecurrencePattern_IdAndOriginalDate(pattern.getId(), nextDate)
+                    .orElse(null);
+                
+                if (override != null && override.isDeleted()) {
+                    // This occurrence was deleted, try the next one
+                    return occurrences.stream()
+                        .skip(1)
+                        .map(date -> {
+                            TodoOverride nextOverride = todoOverrideRepository
+                                .findByRecurrencePattern_IdAndOriginalDate(pattern.getId(), date)
+                                .orElse(null);
+                            if (nextOverride != null && nextOverride.isDeleted()) return null;
+                            if (nextOverride != null) return toOverrideResponse(nextOverride);
+                            return toVirtualResponse(pattern, date);
+                        })
+                        .filter(Objects::nonNull)
+                        .findFirst()
+                        .orElse(null);
+                }
+                
+                if (override != null) return toOverrideResponse(override);
+                return toVirtualResponse(pattern, nextDate);
+            })
+            .filter(Objects::nonNull)
+            .toList();
     }
 }
