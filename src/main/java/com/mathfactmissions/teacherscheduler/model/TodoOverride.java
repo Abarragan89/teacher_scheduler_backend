@@ -39,6 +39,12 @@ public class TodoOverride {
     @Column(columnDefinition = "TEXT")
     private String customTitle;
     
+    @Column(name = "custom_due_date")
+    private Instant customDueDate;    // null = use pattern's calculated date
+    
+    @Column(name = "custom_priority")
+    private Integer customPriority;   // null = use default priority
+    
     @Builder.Default
     @Column(nullable = false)
     private boolean completed = false;

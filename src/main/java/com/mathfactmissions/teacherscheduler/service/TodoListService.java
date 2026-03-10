@@ -81,8 +81,6 @@ public class TodoListService {
                     .build();
             })
             .toList();
-
-//        return todoLists.stream().map(TodoListResponse::fromEntity).toList();
     }
     
     

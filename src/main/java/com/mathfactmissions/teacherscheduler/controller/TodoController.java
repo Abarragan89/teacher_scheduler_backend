@@ -48,8 +48,14 @@ public class TodoController {
         @AuthenticationPrincipal UserPrincipal userInfo
     ) {
         
+        if (request.patternId() != null) {
+            return ResponseEntity.ok(
+                recurrencePatternService.updateVirtualOccurrence(request)
+            );
+        }
+        
         TodoResponse updatedTodo = todoService.updateTodoItem(
-            request.todoId(),
+            UUID.fromString(request.todoId()),
             request.todoText(),
             request.completed(),
             request.priority(),
@@ -75,7 +81,7 @@ public class TodoController {
                 .body("Failed to delete todos");
         }
         
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.noContent().build();
     }
     
     

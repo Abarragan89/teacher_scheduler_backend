@@ -7,10 +7,13 @@ import java.util.UUID;
 
 @Builder
 public record UpdateTodoRequest(
-        UUID todoId,
-        String todoText,
-        Boolean completed,
-        Integer priority,
-        Instant dueDate,
-        UUID todoListId
-) {}
+    String todoId,
+    String todoText,
+    Boolean completed,
+    Integer priority,
+    Instant dueDate,
+    UUID todoListId,
+    Boolean isVirtual,
+    UUID patternId
+) {
+}

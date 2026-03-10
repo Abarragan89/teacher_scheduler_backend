@@ -162,7 +162,6 @@ public class AuthController {
         
         try {
             JWTClaimsSet claims = jwtService.validateToken(accessToken);
-            System.out.println("claims " + claims);
             
             return ResponseEntity.ok(Map.of(
                 "authenticated", true,

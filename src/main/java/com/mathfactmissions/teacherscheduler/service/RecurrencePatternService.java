@@ -1,6 +1,7 @@
 package com.mathfactmissions.teacherscheduler.service;
 
 import com.mathfactmissions.teacherscheduler.dto.todo.request.CreateTodoRequest;
+import com.mathfactmissions.teacherscheduler.dto.todo.request.UpdateTodoRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.response.TodoResponse;
 import com.mathfactmissions.teacherscheduler.enums.MonthPatternType;
 import com.mathfactmissions.teacherscheduler.enums.RecurrenceType;
@@ -158,18 +159,19 @@ public class RecurrencePatternService {
     
     private TodoResponse toOverrideResponse(TodoOverride override) {
         RecurrencePattern pattern = override.getRecurrencePattern();
-        Instant dueDate = ZonedDateTime.of(
-            override.getOriginalDate(),
-            pattern.getTimeOfDay(),
-            pattern.getTimeZone()
-        ).toInstant();
+        
+        Instant dueDate = override.getCustomDueDate() != null
+            ? override.getCustomDueDate()
+            : ZonedDateTime.of(override.getOriginalDate(), pattern.getTimeOfDay(), pattern.getTimeZone()).toInstant();
         
         return TodoResponse.builder()
             .id(override.getId().toString())
             .patternId(pattern.getId())
             .text(override.getCustomTitle() != null ? override.getCustomTitle() : pattern.getText())
             .dueDate(dueDate)
+            .listId(pattern.getTodoList().getId())
             .timeOfDay(pattern.getTimeOfDay())
+            .priority(override.getCustomPriority() != null ? override.getCustomPriority() : 1)
             .completed(override.isCompleted())
             .isVirtual(false)
             .build();
@@ -226,5 +228,42 @@ public class RecurrencePatternService {
             })
             .filter(Objects::nonNull)
             .toList();
+    }
+    
+    public TodoResponse updateVirtualOccurrence(UpdateTodoRequest request) {
+        UUID patternId = request.patternId();
+        
+        RecurrencePattern pattern = recurrencePatternRepository.findById(patternId)
+            .orElseThrow(() -> new RuntimeException("Pattern not found"));
+        
+        // For virtual: parse date from id. For override: find by the real UUID
+        TodoOverride override;
+        
+        if (request.todoId().startsWith("virtual_")) {
+            // First time editing this occurrence — parse date from virtual id
+            String[] parts = request.todoId().split("_", 3);
+            LocalDate date = LocalDate.parse(parts[2]);
+            
+            override = todoOverrideRepository
+                .findByRecurrencePattern_IdAndOriginalDate(patternId, date)
+                .orElse(TodoOverride.builder()
+                    .recurrencePattern(pattern)
+                    .todoList(pattern.getTodoList())
+                    .originalDate(date)
+                    .build());
+        } else {
+            // Already an override row — find it by its real UUID
+            override = todoOverrideRepository
+                .findById(UUID.fromString(request.todoId()))
+                .orElseThrow(() -> new RuntimeException("Override not found"));
+        }
+        
+        override.setCustomTitle(request.todoText());
+        override.setCompleted(request.completed() != null ? request.completed() : false);
+        override.setCustomDueDate(request.dueDate());
+        override.setCustomPriority(request.priority());
+        
+        todoOverrideRepository.save(override);
+        return toOverrideResponse(override);
     }
 }

@@ -41,10 +41,6 @@ public class Todo {
     
     @Column(nullable = false)
     private Boolean completed;
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "recurrence_pattern_id")
-//    private RecurrencePattern recurrencePattern;
     
     @Builder.Default
     @Column(name = "notification_sent", nullable = false)
