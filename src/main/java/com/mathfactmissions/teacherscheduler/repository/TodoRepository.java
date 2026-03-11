@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,5 +33,14 @@ public interface TodoRepository extends JpaRepository<Todo, UUID> {
             ORDER BY t.dueDate ASC
         """)
     List<Todo> findOverdueTodos(@Param("now") Instant now);
+    
+    @Query("""
+            SELECT t FROM Todo t
+            JOIN FETCH t.todoList tl
+            WHERE tl.user.id = :userId
+            AND CAST(t.dueDate AS LocalDate) = :date
+        """)
+    List<Todo> findByUserIdAndDate(@Param("userId") UUID userId, @Param("date") LocalDate date);
+    
 }
 

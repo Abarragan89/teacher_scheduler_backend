@@ -12,6 +12,7 @@ import com.mathfactmissions.teacherscheduler.model.User;
 import com.mathfactmissions.teacherscheduler.repository.RecurrencePatternRepository;
 import com.mathfactmissions.teacherscheduler.repository.TodoListRepository;
 import com.mathfactmissions.teacherscheduler.repository.TodoOverrideRepository;
+import com.mathfactmissions.teacherscheduler.repository.TodoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,10 +22,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,6 +33,7 @@ public class RecurrencePatternService {
     private final RecurrencePatternRepository recurrencePatternRepository;
     private final UserService userService;
     private final TodoListRepository todoListRepository;
+    private final TodoRepository todoRepository;
     private final TodoOverrideRepository todoOverrideRepository;
     private final RecurrenceEngine recurrenceEngine;
     
@@ -150,7 +149,8 @@ public class RecurrencePatternService {
             .patternId(pattern.getId())
             .text(pattern.getText())
             .dueDate(dueDate)
-            .listId(pattern.getTodoList().getId())
+            .isRecurring(true)
+            .todoListId(pattern.getTodoList().getId())
             .timeOfDay(pattern.getTimeOfDay())
             .completed(false)
             .isVirtual(true)
@@ -159,18 +159,26 @@ public class RecurrencePatternService {
     
     private TodoResponse toOverrideResponse(TodoOverride override) {
         RecurrencePattern pattern = override.getRecurrencePattern();
-        
-        Instant dueDate = override.getCustomDueDate() != null
-            ? override.getCustomDueDate()
-            : ZonedDateTime.of(override.getOriginalDate(), pattern.getTimeOfDay(), pattern.getTimeZone()).toInstant();
+        System.out.println("get custom due date" + override.getCustomDueDate());
+//        Instant dueDate = override.getCustomDueDate() != null
+//            ? override.getCustomDueDate()
+//            : ZonedDateTime.of(override.getOriginalDate(), pattern.getTimeOfDay(), pattern.getTimeZone()).toInstant();
+//
+
+//        Instant dueDate = ZonedDateTime.of(
+//            override.getOriginalDate(),
+//            pattern.getTimeOfDay(),
+//            pattern.getTimeZone()
+//        ).toInstant();
         
         return TodoResponse.builder()
             .id(override.getId().toString())
             .patternId(pattern.getId())
             .text(override.getCustomTitle() != null ? override.getCustomTitle() : pattern.getText())
-            .dueDate(dueDate)
-            .listId(pattern.getTodoList().getId())
+            .dueDate(override.getCustomDueDate())
+            .todoListId(override.getTodoList().getId())
             .timeOfDay(pattern.getTimeOfDay())
+            .isRecurring(true)
             .priority(override.getCustomPriority() != null ? override.getCustomPriority() : 1)
             .completed(override.isCompleted())
             .isVirtual(false)
@@ -244,11 +252,18 @@ public class RecurrencePatternService {
             String[] parts = request.todoId().split("_", 3);
             LocalDate date = LocalDate.parse(parts[2]);
             
+            TodoList todoList = pattern.getTodoList();
+            
+            if (!request.todoListId().equals(pattern.getTodoList().getId())) {
+                todoList = todoListRepository.findById(request.todoListId())
+                    .orElseThrow(() -> new RuntimeException("Todo list not found"));
+            }
+            
             override = todoOverrideRepository
                 .findByRecurrencePattern_IdAndOriginalDate(patternId, date)
                 .orElse(TodoOverride.builder()
                     .recurrencePattern(pattern)
-                    .todoList(pattern.getTodoList())
+                    .todoList(todoList)
                     .originalDate(date)
                     .build());
         } else {
@@ -256,6 +271,12 @@ public class RecurrencePatternService {
             override = todoOverrideRepository
                 .findById(UUID.fromString(request.todoId()))
                 .orElseThrow(() -> new RuntimeException("Override not found"));
+            
+            if (!request.todoListId().equals(override.getTodoList().getId())) {
+                TodoList todoList = todoListRepository.findById(request.todoListId())
+                    .orElseThrow(() -> new RuntimeException("Todo list not found"));
+                override.setTodoList(todoList);
+            }
         }
         
         override.setCustomTitle(request.todoText());
@@ -263,7 +284,31 @@ public class RecurrencePatternService {
         override.setCustomDueDate(request.dueDate());
         override.setCustomPriority(request.priority());
         
+        
         todoOverrideRepository.save(override);
         return toOverrideResponse(override);
+    }
+    
+    public List<TodoResponse> getTodosForDate(UUID userId, LocalDate date) {
+        // Regular todos for this date
+        List<TodoResponse> regularTodos = todoRepository
+            .findByUserIdAndDate(userId, date)
+            .stream()
+            .map(TodoResponse::fromEntity)
+            .toList();
+        
+        // Recurring todos (virtuals + overrides) for this date
+        List<TodoResponse> recurringTodos = getRecurringTodosInRange(userId, date, date);
+        
+        List<TodoResponse> all = new ArrayList<>();
+        all.addAll(regularTodos);
+        all.addAll(recurringTodos);
+        
+        all.sort(Comparator.comparing(
+            TodoResponse::dueDate,
+            Comparator.nullsLast(Comparator.naturalOrder())
+        ));
+        
+        return all;
     }
 }

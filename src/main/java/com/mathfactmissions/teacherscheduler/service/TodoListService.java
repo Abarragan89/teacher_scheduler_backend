@@ -53,7 +53,7 @@ public class TodoListService {
         
         // Group occurrences by todoListId
         Map<UUID, List<TodoResponse>> occurrencesByList = nextOccurrences.stream()
-            .collect(Collectors.groupingBy(TodoResponse::listId));
+            .collect(Collectors.groupingBy(TodoResponse::todoListId));
         
         // Build response, merging next occurrences into their respective lists
         return lists.stream()
@@ -77,6 +77,7 @@ public class TodoListService {
                 return TodoListResponse.builder()
                     .id(list.getId())
                     .listName(list.getListName())
+                    .isDefault(list.getIsDefault())
                     .todos(regularTodos)
                     .build();
             })

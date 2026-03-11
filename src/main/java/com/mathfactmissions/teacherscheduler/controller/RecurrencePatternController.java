@@ -42,4 +42,14 @@ public class RecurrencePatternController {
             recurrencePatternService.getNextOccurrenceForEachPattern(userInfo.getId())
         );
     }
+    
+    @GetMapping("/todos-for-date/{date}")
+    public ResponseEntity<List<TodoResponse>> getTodosForDate(
+        @PathVariable LocalDate date,
+        @AuthenticationPrincipal UserPrincipal userInfo
+    ) {
+        return ResponseEntity.ok(
+            recurrencePatternService.getTodosForDate(userInfo.getId(), date)
+        );
+    }
 }
