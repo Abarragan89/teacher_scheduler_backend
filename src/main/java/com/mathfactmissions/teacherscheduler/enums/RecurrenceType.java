@@ -4,26 +4,21 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 public enum RecurrenceType {
-    DAILY("daily", "Daily"),
-    WEEKLY("weekly", "Weekly"),
-    MONTHLY("monthly", "Monthly"),
-    YEARLY("yearly", "Yearly");
-
+    DAILY("DAILY", "Daily"),
+    WEEKLY("WEEKLY", "Weekly"),
+    MONTHLY("MONTHLY", "Monthly"),
+    YEARLY("YEARLY", "Yearly");
+    
     private final String value;
-
+    
     @Getter
     private final String displayName;
-
+    
     RecurrenceType(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }
-
-    @JsonValue
-    public String getValue() {
-        return value;
-    }
-
+    
     public static RecurrenceType fromValue(String value) {
         for (RecurrenceType type : RecurrenceType.values()) {
             if (type.value.equals(value)) {
@@ -31,5 +26,10 @@ public enum RecurrenceType {
             }
         }
         throw new IllegalArgumentException("Invalid recurrence type: " + value);
+    }
+    
+    @JsonValue
+    public String getValue() {
+        return value;
     }
 }

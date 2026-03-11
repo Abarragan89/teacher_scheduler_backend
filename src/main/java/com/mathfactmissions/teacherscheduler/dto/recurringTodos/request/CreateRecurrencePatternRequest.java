@@ -1,5 +1,6 @@
 package com.mathfactmissions.teacherscheduler.dto.recurringTodos.request;
 
+import com.mathfactmissions.teacherscheduler.enums.RecurrenceType;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
@@ -10,7 +11,7 @@ import java.util.List;
 @Builder
 public record CreateRecurrencePatternRequest(
     
-    @NotBlank(message = "Recurrence type is required") String type,
+    @NotBlank(message = "Recurrence type is required") RecurrenceType type,
     @NotBlank(message = "Time is required") String timeOfDay,
     @NotBlank(message = "Time Zone Required") ZoneId timeZone,
     List<String> daysOfWeek,

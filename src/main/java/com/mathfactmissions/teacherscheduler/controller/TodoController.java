@@ -49,9 +49,16 @@ public class TodoController {
     ) {
         
         if (request.patternId() != null) {
-            return ResponseEntity.ok(
-                recurrencePatternService.updateVirtualOccurrence(request)
-            );
+            
+            if (request.editScope().equals("single")) {
+                return ResponseEntity.ok(
+                    recurrencePatternService.updateVirtualOccurrence(request)
+                );
+            } else if (request.editScope().equals("future")) {
+                return ResponseEntity.ok(
+                    recurrencePatternService.updateAllFutureOccurrences(request)
+                );
+            }
         }
         
         TodoResponse updatedTodo = todoService.updateTodoItem(

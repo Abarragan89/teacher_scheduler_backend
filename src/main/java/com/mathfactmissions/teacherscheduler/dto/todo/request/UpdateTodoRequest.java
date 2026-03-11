@@ -1,5 +1,6 @@
 package com.mathfactmissions.teacherscheduler.dto.todo.request;
 
+import com.mathfactmissions.teacherscheduler.dto.recurringTodos.request.CreateRecurrencePatternRequest;
 import lombok.Builder;
 
 import java.time.Instant;
@@ -14,6 +15,8 @@ public record UpdateTodoRequest(
     Instant dueDate,
     UUID todoListId,
     Boolean isVirtual,
-    UUID patternId
+    UUID patternId,
+    String editScope,
+    CreateRecurrencePatternRequest recurrencePattern
 ) {
 }

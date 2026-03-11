@@ -1,10 +1,10 @@
 package com.mathfactmissions.teacherscheduler.service;
 
+import com.mathfactmissions.teacherscheduler.dto.recurringTodos.request.CreateRecurrencePatternRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.request.CreateTodoRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.request.UpdateTodoRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.response.TodoResponse;
 import com.mathfactmissions.teacherscheduler.enums.MonthPatternType;
-import com.mathfactmissions.teacherscheduler.enums.RecurrenceType;
 import com.mathfactmissions.teacherscheduler.model.RecurrencePattern;
 import com.mathfactmissions.teacherscheduler.model.TodoList;
 import com.mathfactmissions.teacherscheduler.model.TodoOverride;
@@ -48,7 +48,7 @@ public class RecurrencePatternService {
             .orElseThrow(() -> new RuntimeException("Todo list not found or not owned"));
         
         RecurrencePattern pattern = RecurrencePattern.builder()
-            .type(RecurrenceType.valueOf(request.recurrencePattern().type().toUpperCase()))
+            .type(request.recurrencePattern().type())
             .timeOfDay(LocalTime.parse(request.recurrencePattern().timeOfDay()))
             .text(request.todoText())
             .timeZone(request.recurrencePattern().timeZone())
@@ -58,29 +58,7 @@ public class RecurrencePatternService {
             .todoList(todoList)
             .build();
         
-        switch (pattern.getType()) {
-            case WEEKLY:
-                pattern.setDaysOfWeek(String.join(",", request.recurrencePattern().daysOfWeek()));
-                break;
-            case MONTHLY:
-                if ("BY_DATE".equals(request.recurrencePattern().monthPatternType())) {
-                    pattern.setMonthPatternType(MonthPatternType.BY_DATE);
-                    pattern.setDaysOfMonth(String.join(",", request.recurrencePattern().daysOfMonth()));
-                } else {
-                    pattern.setMonthPatternType(MonthPatternType.BY_DAY);
-                    pattern.setNthWeekdayOccurrence(request.recurrencePattern().nthWeekdayOccurrence().ordinal());
-                    pattern.setNthWeekdayDay(request.recurrencePattern().nthWeekdayOccurrence().weekday());
-                }
-                break;
-            case YEARLY:
-                LocalDate yearlyDate = request.recurrencePattern().yearlyDate();
-                pattern.setYearlyMonth(yearlyDate.getMonthValue());
-                pattern.setYearlyDay(yearlyDate.getDayOfMonth());
-                break;
-            case DAILY:
-            default:
-                break;
-        }
+        applyRecurrencePatternFields(pattern, request.recurrencePattern());
         
         recurrencePatternRepository.save(pattern);
         
@@ -310,5 +288,85 @@ public class RecurrencePatternService {
         ));
         
         return all;
+    }
+    
+    
+    @Transactional
+    public TodoResponse updateAllFutureOccurrences(UpdateTodoRequest request) {
+        UUID patternId = request.patternId();
+        
+        RecurrencePattern pattern = recurrencePatternRepository.findById(patternId)
+            .orElseThrow(() -> new RuntimeException("Pattern not found"));
+        
+        LocalDate fromDate = request.dueDate()
+            .atZone(pattern.getTimeZone())
+            .toLocalDate();
+        
+        // Update text
+        pattern.setText(request.todoText());
+        pattern.setType(request.recurrencePattern().type());
+        
+        // Update time of day
+        if (request.recurrencePattern().timeOfDay() != null) {
+            pattern.setTimeOfDay(LocalTime.parse(request.recurrencePattern().timeOfDay()));
+        }
+        
+        // Update timezone
+        if (request.recurrencePattern().timeZone() != null) {
+            pattern.setTimeZone(request.recurrencePattern().timeZone());
+        }
+        
+        // Update start/end dates
+        if (request.recurrencePattern().startDate() != null) {
+            pattern.setStartDate(request.recurrencePattern().startDate());
+        }
+        
+        if (request.recurrencePattern().endDate() != null) {
+            pattern.setEndDate(request.recurrencePattern().endDate());
+        }
+        
+        // Update recurrence type specific fields
+        applyRecurrencePatternFields(pattern, request.recurrencePattern());
+        
+        recurrencePatternRepository.save(pattern);
+        
+        if (request.todoListId() != null && !request.todoListId().equals(pattern.getTodoList().getId())) {
+            TodoList todoList = todoListRepository.findById(request.todoListId())
+                .orElseThrow(() -> new RuntimeException("Todo list not found"));
+            pattern.setTodoList(todoList);
+        }
+        
+        todoOverrideRepository.deleteByRecurrencePattern_IdAndOriginalDateGreaterThanEqual(
+            patternId, fromDate
+        );
+        
+        return toVirtualResponse(pattern, fromDate);
+    }
+    
+    // Shared helper — used in both create and update
+    private void applyRecurrencePatternFields(RecurrencePattern pattern, CreateRecurrencePatternRequest request) {
+        switch (pattern.getType()) {
+            case WEEKLY:
+                pattern.setDaysOfWeek(String.join(",", request.daysOfWeek()));
+                break;
+            case MONTHLY:
+                if ("BY_DATE".equals(request.monthPatternType())) {
+                    pattern.setMonthPatternType(MonthPatternType.BY_DATE);
+                    pattern.setDaysOfMonth(String.join(",", request.daysOfMonth()));
+                } else {
+                    pattern.setMonthPatternType(MonthPatternType.BY_DAY);
+                    pattern.setNthWeekdayOccurrence(request.nthWeekdayOccurrence().ordinal());
+                    pattern.setNthWeekdayDay(request.nthWeekdayOccurrence().weekday());
+                }
+                break;
+            case YEARLY:
+                LocalDate yearlyDate = request.yearlyDate();
+                pattern.setYearlyMonth(yearlyDate.getMonthValue());
+                pattern.setYearlyDay(yearlyDate.getDayOfMonth());
+                break;
+            case DAILY:
+            default:
+                break;
+        }
     }
 }

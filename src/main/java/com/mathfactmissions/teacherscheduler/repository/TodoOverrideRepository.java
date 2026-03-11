@@ -19,4 +19,8 @@ public interface TodoOverrideRepository extends JpaRepository<TodoOverride, UUID
     Optional<TodoOverride> findByRecurrencePattern_IdAndOriginalDate(
         UUID patternId, LocalDate date
     );
+    
+    void deleteByRecurrencePattern_IdAndOriginalDateGreaterThanEqual(
+        UUID patternId, LocalDate fromDate
+    );
 }
