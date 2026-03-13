@@ -20,7 +20,8 @@ public record TodoResponse(
     Boolean isVirtual,
     UUID patternId,         // new
     RecurrencePatternResponse recurrencePattern,
-    UUID todoListId
+    UUID todoListId,
+    String listName
 ) {
     public static TodoResponse fromEntity(Todo todo) {
         return TodoResponse.builder()
@@ -32,6 +33,8 @@ public record TodoResponse(
             .isRecurring(false)
             .isVirtual(false)
             .todoListId(todo.getTodoList().getId())
+            .listName(todo.getTodoList().getListName())
+            .recurrencePattern(null)
             .patternId(null)
             .timeOfDay(null)
             .build();

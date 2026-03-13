@@ -1,18 +1,17 @@
 package com.mathfactmissions.teacherscheduler.controller;
 
+import com.mathfactmissions.teacherscheduler.dto.recurringTodos.request.DeleteOccurrenceRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.response.TodoResponse;
 import com.mathfactmissions.teacherscheduler.security.UserPrincipal;
 import com.mathfactmissions.teacherscheduler.service.RecurrencePatternService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/recurrence")
@@ -43,6 +42,7 @@ public class RecurrencePatternController {
         );
     }
     
+    // This gets recurrence todos and normal todos
     @GetMapping("/todos-for-date/{date}")
     public ResponseEntity<List<TodoResponse>> getTodosForDate(
         @PathVariable LocalDate date,
@@ -51,5 +51,23 @@ public class RecurrencePatternController {
         return ResponseEntity.ok(
             recurrencePatternService.getTodosForDate(userInfo.getId(), date)
         );
+    }
+    
+    @DeleteMapping("/delete-recurrence/{patternId}")
+    public ResponseEntity<String> deleteRecurrencePattern(
+        @PathVariable UUID patternId,
+        @AuthenticationPrincipal UserPrincipal userInfo
+    ) {
+        recurrencePatternService.deleteRecurrencePattern(patternId, userInfo.getId());
+        return ResponseEntity.noContent().build();
+    }
+    
+    @DeleteMapping("/delete-single-occurrence")
+    public ResponseEntity<Void> deleteOccurrence(
+        @RequestBody DeleteOccurrenceRequest request,
+        @AuthenticationPrincipal UserPrincipal userInfo
+    ) {
+        recurrencePatternService.deleteOccurrence(request);
+        return ResponseEntity.noContent().build();
     }
 }

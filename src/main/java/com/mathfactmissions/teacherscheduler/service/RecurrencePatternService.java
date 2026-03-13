@@ -1,6 +1,8 @@
 package com.mathfactmissions.teacherscheduler.service;
 
 import com.mathfactmissions.teacherscheduler.dto.recurringTodos.request.CreateRecurrencePatternRequest;
+import com.mathfactmissions.teacherscheduler.dto.recurringTodos.request.DeleteOccurrenceRequest;
+import com.mathfactmissions.teacherscheduler.dto.recurringTodos.response.RecurrencePatternResponse;
 import com.mathfactmissions.teacherscheduler.dto.todo.request.CreateTodoRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.request.UpdateTodoRequest;
 import com.mathfactmissions.teacherscheduler.dto.todo.response.TodoResponse;
@@ -128,8 +130,10 @@ public class RecurrencePatternService {
             .text(pattern.getText())
             .dueDate(dueDate)
             .isRecurring(true)
+            .listName(pattern.getTodoList().getListName())
             .todoListId(pattern.getTodoList().getId())
             .timeOfDay(pattern.getTimeOfDay())
+            .recurrencePattern(RecurrencePatternResponse.fromEntity(pattern))
             .completed(false)
             .isVirtual(true)
             .build();
@@ -137,7 +141,7 @@ public class RecurrencePatternService {
     
     private TodoResponse toOverrideResponse(TodoOverride override) {
         RecurrencePattern pattern = override.getRecurrencePattern();
-        System.out.println("get custom due date" + override.getCustomDueDate());
+
 //        Instant dueDate = override.getCustomDueDate() != null
 //            ? override.getCustomDueDate()
 //            : ZonedDateTime.of(override.getOriginalDate(), pattern.getTimeOfDay(), pattern.getTimeZone()).toInstant();
@@ -156,8 +160,10 @@ public class RecurrencePatternService {
             .dueDate(override.getCustomDueDate())
             .todoListId(override.getTodoList().getId())
             .timeOfDay(pattern.getTimeOfDay())
+            .listName(override.getTodoList().getListName())
             .isRecurring(true)
             .priority(override.getCustomPriority() != null ? override.getCustomPriority() : 1)
+            .recurrencePattern(RecurrencePatternResponse.fromEntity(pattern))
             .completed(override.isCompleted())
             .isVirtual(false)
             .build();
@@ -259,10 +265,6 @@ public class RecurrencePatternService {
         
         override.setCustomTitle(request.todoText());
         override.setCompleted(request.completed() != null ? request.completed() : false);
-        override.setCustomDueDate(request.dueDate());
-        override.setCustomPriority(request.priority());
-        
-        
         todoOverrideRepository.save(override);
         return toOverrideResponse(override);
     }
@@ -368,5 +370,49 @@ public class RecurrencePatternService {
             default:
                 break;
         }
+    }
+    
+    @Transactional
+    public void deleteRecurrencePattern(UUID patternId, UUID userId) {
+        RecurrencePattern pattern = recurrencePatternRepository.findById(patternId)
+            .orElseThrow(() -> new RuntimeException("Pattern not found"));
+        
+        // Make sure this pattern belongs to the user
+        if (!pattern.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized");
+        }
+        
+        // Delete the pattern
+        recurrencePatternRepository.delete(pattern);
+    }
+    
+    @Transactional
+    public void deleteOccurrence(DeleteOccurrenceRequest request) {
+        UUID patternId = request.patternId();
+        
+        RecurrencePattern pattern = recurrencePatternRepository.findById(patternId)
+            .orElseThrow(() -> new RuntimeException("Pattern not found"));
+        
+        TodoOverride override;
+        
+        if (request.todoId().startsWith("virtual_")) {
+            String[] parts = request.todoId().split("_", 3);
+            LocalDate date = LocalDate.parse(parts[2]);
+            
+            override = todoOverrideRepository
+                .findByRecurrencePattern_IdAndOriginalDate(patternId, date)
+                .orElse(TodoOverride.builder()
+                    .recurrencePattern(pattern)
+                    .todoList(pattern.getTodoList())
+                    .originalDate(date)
+                    .build());
+        } else {
+            override = todoOverrideRepository
+                .findById(UUID.fromString(request.todoId()))
+                .orElseThrow(() -> new RuntimeException("Override not found"));
+        }
+        
+        override.setDeleted(true);
+        todoOverrideRepository.save(override);
     }
 }
