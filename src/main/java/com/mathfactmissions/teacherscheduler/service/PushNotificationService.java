@@ -190,7 +190,7 @@ public class PushNotificationService {
         if (todos.size() == 1) {
             body = String.format("You have 1 todo coming up: %s", todos.get(0).text());
         } else {
-            body = String.format("You have %d todos coming up over the next 10 days", todos.size());
+            body = String.format("You have %d todos coming up this week.", todos.size());
         }
         
         // Link to today's date as entry point
