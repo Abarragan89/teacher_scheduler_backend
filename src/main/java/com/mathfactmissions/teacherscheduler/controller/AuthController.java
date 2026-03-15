@@ -93,7 +93,7 @@ public class AuthController {
         
         // Generate real tokens
         String accessToken = jwtService.generateToken(user.getEmail(), accessClaims, 15); // 15 minute expiration
-        String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("type", "refresh"), 43200); // 30 day expiration
+        String refreshToken = jwtService.generateToken(user.getEmail(), Map.of("type", "refresh"), 10 * 365 * 24 * 60); // 10 years expiration
         
         // Cookies
         ResponseCookie accessCookie = ResponseCookie.from("access_token", accessToken)

@@ -148,14 +148,14 @@ public class PushNotificationService {
     public void sendDailyReminderNotification(User user, List<TodoResponse> todos) {
         List<PushSubscription> subscriptions = pushSubscriptionService.getSubscriptionsByUserId(user.getId());
         
-        String title = "Good Morning! Your todos for today 📋";
+        String title = "Good Morning! Your TODOS 📋";
         
         // Build body summarizing todos
         String body;
         if (todos.size() == 1) {
             body = todos.get(0).text();
         } else {
-            body = String.format("%d todos scheduled for today. First up: %s",
+            body = String.format("%d todos scheduled for today.",
                 todos.size(),
                 todos.get(0).text()
             );
@@ -164,7 +164,7 @@ public class PushNotificationService {
         // Link to today's daily view
         String dateString = LocalDate.now(user.getTimeZone())
             .format(DateTimeFormatter.ISO_LOCAL_DATE);
-        String targetUrl = String.format("/dashboard/daily/%s?view=todos", dateString);
+        String targetUrl = String.format("/dashboard/todo-reminder-range?view=today", dateString);
         
         String payload = String.format("""
             {
@@ -196,7 +196,7 @@ public class PushNotificationService {
         // Link to today's date as entry point
         String dateString = LocalDate.now(user.getTimeZone())
             .format(DateTimeFormatter.ISO_LOCAL_DATE);
-        String targetUrl = String.format("/dashboard/daily/%s?view=todos", dateString);
+        String targetUrl = String.format("/dashboard/todo-reminder-range?view=week", dateString);
         
         String payload = String.format("""
             {
