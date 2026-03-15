@@ -1,12 +1,15 @@
 package com.mathfactmissions.teacherscheduler.service;
 
+import com.mathfactmissions.teacherscheduler.dto.todo.response.TodoResponse;
 import com.mathfactmissions.teacherscheduler.model.PushSubscription;
 import com.mathfactmissions.teacherscheduler.model.Todo;
+import com.mathfactmissions.teacherscheduler.model.User;
 import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -140,5 +143,73 @@ public class PushNotificationService {
     // Helper method to escape JSON strings
     private String escapeJson(String text) {
         return text.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
+    }
+    
+    public void sendDailyReminderNotification(User user, List<TodoResponse> todos) {
+        List<PushSubscription> subscriptions = pushSubscriptionService.getSubscriptionsByUserId(user.getId());
+        
+        String title = "Good Morning! Your todos for today 📋";
+        
+        // Build body summarizing todos
+        String body;
+        if (todos.size() == 1) {
+            body = todos.get(0).text();
+        } else {
+            body = String.format("%d todos scheduled for today. First up: %s",
+                todos.size(),
+                todos.get(0).text()
+            );
+        }
+        
+        // Link to today's daily view
+        String dateString = LocalDate.now(user.getTimeZone())
+            .format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String targetUrl = String.format("/dashboard/daily/%s?view=todos", dateString);
+        
+        String payload = String.format("""
+            {
+                "title": "%s",
+                "body": "%s",
+                "icon": "/icon-192x192.png",
+                "badge": "/badge-72x72.png",
+                "data": {
+                    "url": "%s"
+                }
+            }
+            """, escapeJson(title), escapeJson(body), targetUrl);
+        
+        sendNotificationToSubscriptions(subscriptions, payload, user.getId().toString());
+    }
+    
+    public void sendWeeklyUpcomingNotification(User user, List<TodoResponse> todos) {
+        List<PushSubscription> subscriptions = pushSubscriptionService.getSubscriptionsByUserId(user.getId());
+        
+        String title = "Your week ahead 📅";
+        
+        String body;
+        if (todos.size() == 1) {
+            body = String.format("You have 1 todo coming up: %s", todos.get(0).text());
+        } else {
+            body = String.format("You have %d todos coming up over the next 10 days", todos.size());
+        }
+        
+        // Link to today's date as entry point
+        String dateString = LocalDate.now(user.getTimeZone())
+            .format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String targetUrl = String.format("/dashboard/daily/%s?view=todos", dateString);
+        
+        String payload = String.format("""
+            {
+                "title": "%s",
+                "body": "%s",
+                "icon": "/icon-192x192.png",
+                "badge": "/badge-72x72.png",
+                "data": {
+                    "url": "%s"
+                }
+            }
+            """, escapeJson(title), escapeJson(body), targetUrl);
+        
+        sendNotificationToSubscriptions(subscriptions, payload, user.getId().toString());
     }
 }

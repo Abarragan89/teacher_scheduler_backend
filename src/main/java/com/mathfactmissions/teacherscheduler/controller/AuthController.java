@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +49,7 @@ public class AuthController {
         @Valid @RequestBody MagicLinkRequest dto
     ) throws JOSEException {
         
-        magicLinkService.sendMagicLink(dto.email());
+        magicLinkService.sendMagicLink(dto.email(), dto.timeZone());
         
         return ResponseEntity.ok(Map.of(
             "message", "Magic link sent",
@@ -73,11 +74,13 @@ public class AuthController {
         
         // Find user by email
         String email = magicClaims.getSubject();
+        String timeZone = magicClaims.getStringClaim("timeZone");
         
         User user = userService.findOrCreateUser(email);
         
         if (!user.isInitialized()) {
             todoListService.createNewList(user.getId(), "Unlisted");
+            user.setTimeZone(ZoneId.of(timeZone));
             user.setInitialized(true);
             userService.save(user);
         }

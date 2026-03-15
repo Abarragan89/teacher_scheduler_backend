@@ -42,5 +42,18 @@ public interface TodoRepository extends JpaRepository<Todo, UUID> {
         """)
     List<Todo> findByUserIdAndDate(@Param("userId") UUID userId, @Param("date") LocalDate date);
     
+    @Query("""
+            SELECT t FROM Todo t
+            JOIN FETCH t.todoList tl
+            WHERE tl.user.id = :userId
+            AND t.dueDate >= :start
+            AND t.dueDate < :end
+            AND t.completed = false
+        """)
+    List<Todo> findByTodoList_User_IdAndDueDateBetweenAndCompletedFalse(
+        @Param("userId") UUID userId,
+        @Param("start") Instant start,
+        @Param("end") Instant end
+    );
 }
 
