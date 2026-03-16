@@ -265,6 +265,7 @@ public class RecurrencePatternService {
         
         override.setCustomTitle(request.todoText());
         override.setCompleted(request.completed() != null ? request.completed() : false);
+        override.setCustomDueDate(request.dueDate());
         todoOverrideRepository.save(override);
         return toOverrideResponse(override);
     }
