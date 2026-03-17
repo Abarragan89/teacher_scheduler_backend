@@ -20,10 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -271,9 +268,11 @@ public class RecurrencePatternService {
     }
     
     public List<TodoResponse> getTodosForDate(UUID userId, LocalDate date) {
-        // Regular todos for this date
+        Instant start = date.atStartOfDay(ZoneOffset.UTC).toInstant();     // 2026-03-17 00:00:00 UTC
+        Instant end = date.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant(); // 2026-03-18 00:00:00 UTC
+        
         List<TodoResponse> regularTodos = todoRepository
-            .findByUserIdAndDate(userId, date)
+            .findByUserIdAndDate(userId, start, end)  // updated call
             .stream()
             .map(TodoResponse::fromEntity)
             .toList();

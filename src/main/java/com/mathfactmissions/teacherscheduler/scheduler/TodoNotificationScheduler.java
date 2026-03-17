@@ -81,6 +81,9 @@ public class TodoNotificationScheduler {
         }
     }
     
+    /**
+     * Send daily morning reminders
+     */
     @Scheduled(cron = "0 0,15,30,45 * * * *")
     public void sendDailyMorningReminders() {
         LocalTime targetTime = LocalTime.of(6, 30);
