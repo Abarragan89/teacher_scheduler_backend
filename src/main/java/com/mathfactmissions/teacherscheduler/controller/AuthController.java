@@ -90,6 +90,7 @@ public class AuthController {
         Map<String, Object> accessClaims = new HashMap<>();
         accessClaims.put("roles", user.getRoles());
         accessClaims.put("user_id", user.getId());
+        accessClaims.put("time_zone", user.getTimeZone().getId());
         
         // Generate real tokens
         String accessToken = jwtService.generateToken(user.getEmail(), accessClaims, 15); // 15 minute expiration
@@ -136,6 +137,7 @@ public class AuthController {
         Map<String, Object> accessClaims = new HashMap<>();
         accessClaims.put("roles", user.getRoles());
         accessClaims.put("user_id", user.getId());
+        accessClaims.put("time_zone", user.getTimeZone().getId());
         
         // Create new access token
         String newAccessToken = jwtService.generateToken(email, accessClaims, 15);

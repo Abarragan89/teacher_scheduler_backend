@@ -267,9 +267,11 @@ public class RecurrencePatternService {
         return toOverrideResponse(override);
     }
     
-    public List<TodoResponse> getTodosForDate(UUID userId, LocalDate date) {
-        Instant start = date.atStartOfDay(ZoneOffset.UTC).toInstant();     // 2026-03-17 00:00:00 UTC
-        Instant end = date.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant(); // 2026-03-18 00:00:00 UTC
+    public List<TodoResponse> getTodosForDate(UUID userId, LocalDate date, String timeZone) {
+        
+        ZoneId zone = ZoneId.of(timeZone);
+        Instant start = date.atStartOfDay(zone).toInstant();
+        Instant end = date.plusDays(1).atStartOfDay(zone).toInstant();
         
         List<TodoResponse> regularTodos = todoRepository
             .findByUserIdAndDate(userId, start, end)  // updated call

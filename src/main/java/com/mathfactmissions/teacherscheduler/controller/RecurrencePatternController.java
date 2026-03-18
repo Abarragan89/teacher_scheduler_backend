@@ -49,7 +49,7 @@ public class RecurrencePatternController {
         @AuthenticationPrincipal UserPrincipal userInfo
     ) {
         return ResponseEntity.ok(
-            recurrencePatternService.getTodosForDate(userInfo.getId(), date)
+            recurrencePatternService.getTodosForDate(userInfo.getId(), date, userInfo.getTimeZone())
         );
     }
     
@@ -58,6 +58,7 @@ public class RecurrencePatternController {
         @PathVariable UUID patternId,
         @AuthenticationPrincipal UserPrincipal userInfo
     ) {
+        
         recurrencePatternService.deleteRecurrencePattern(patternId, userInfo.getId());
         return ResponseEntity.noContent().build();
     }
