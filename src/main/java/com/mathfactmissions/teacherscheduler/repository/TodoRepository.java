@@ -59,5 +59,8 @@ public interface TodoRepository extends JpaRepository<Todo, UUID> {
         @Param("start") Instant start,
         @Param("end") Instant end
     );
+    
+    void deleteByCompletedTrueAndCompletedAtBefore(Instant cutoff);
+    
 }
 

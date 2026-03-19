@@ -50,7 +50,7 @@ public class TodoService {
         
         TodoList todoList = currentTodo.getTodoList();
         
-        if (todoListId != todoList.getId()) {
+        if (!todoListId.equals(todoList.getId())) {
             todoList = todoListRepository.findByIdAndUser_Id(todoListId, userId)
                 .orElseThrow(() -> new RuntimeException("no todo list found"));
         }
@@ -69,6 +69,13 @@ public class TodoService {
             currentTodo.setOverdueNotificationSent(false);
         }
         
+        if (Boolean.TRUE.equals(completed)) {
+            if (currentTodo.getCompletedAt() == null) {  // only set once, don't reset if already completed
+                currentTodo.setCompletedAt(Instant.now());
+            }
+        } else {
+            currentTodo.setCompletedAt(null);  // ✅ clear when uncompleted
+        }
         return TodoResponse.fromEntity(todoRepository.save(currentTodo));
     }
     

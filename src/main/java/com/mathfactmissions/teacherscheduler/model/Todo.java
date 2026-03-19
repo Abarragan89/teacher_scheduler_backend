@@ -42,6 +42,10 @@ public class Todo {
     @Column(nullable = false)
     private Boolean completed;
     
+    //    This will determine if they need to be deleted
+    @Column(name = "completed_at")
+    private Instant completedAt;
+    
     @Builder.Default
     @Column(name = "notification_sent", nullable = false)
     private boolean notificationSent = false;
