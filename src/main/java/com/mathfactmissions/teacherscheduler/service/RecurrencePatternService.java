@@ -138,17 +138,13 @@ public class RecurrencePatternService {
     
     private TodoResponse toOverrideResponse(TodoOverride override) {
         RecurrencePattern pattern = override.getRecurrencePattern();
-
-//        Instant dueDate = override.getCustomDueDate() != null
-//            ? override.getCustomDueDate()
-//            : ZonedDateTime.of(override.getOriginalDate(), pattern.getTimeOfDay(), pattern.getTimeZone()).toInstant();
-//
-
-//        Instant dueDate = ZonedDateTime.of(
-//            override.getOriginalDate(),
-//            pattern.getTimeOfDay(),
-//            pattern.getTimeZone()
-//        ).toInstant();
+        
+        // Derive timeOfDay from customDueDate if it exists, otherwise fall back to pattern
+        LocalTime timeOfDay = override.getCustomDueDate() != null
+            ? override.getCustomDueDate()
+            .atZone(pattern.getTimeZone())  // or ZoneId.of(pattern.getTimeZone()) if you changed it to String
+            .toLocalTime()
+            : pattern.getTimeOfDay();
         
         return TodoResponse.builder()
             .id(override.getId().toString())
@@ -156,7 +152,7 @@ public class RecurrencePatternService {
             .text(override.getCustomTitle() != null ? override.getCustomTitle() : pattern.getText())
             .dueDate(override.getCustomDueDate())
             .todoListId(override.getTodoList().getId())
-            .timeOfDay(pattern.getTimeOfDay())
+            .timeOfDay(timeOfDay)
             .listName(override.getTodoList().getListName())
             .isRecurring(true)
             .priority(override.getCustomPriority() != null ? override.getCustomPriority() : 1)
@@ -221,6 +217,8 @@ public class RecurrencePatternService {
     
     public TodoResponse updateVirtualOccurrence(UpdateTodoRequest request) {
         UUID patternId = request.patternId();
+        
+        System.out.println("request due date" + request.dueDate());
         
         RecurrencePattern pattern = recurrencePatternRepository.findById(patternId)
             .orElseThrow(() -> new RuntimeException("Pattern not found"));

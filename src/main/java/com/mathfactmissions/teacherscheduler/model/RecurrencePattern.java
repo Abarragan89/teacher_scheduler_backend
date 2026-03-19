@@ -21,7 +21,6 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class RecurrencePattern {
     
     @Id
