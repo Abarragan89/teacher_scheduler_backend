@@ -28,12 +28,14 @@ public class TodoNotificationScheduler {
     private final RecurrencePatternService recurrencePatternService;
     
     
-    @Scheduled(fixedRate = 300000) // every 5 minutes
+    @Scheduled(fixedRate = 30000) // every 5 minutes
     public void checkDueTodos() {
         Instant now = Instant.now();
         Instant tenMinutesFromNow = now.plus(10, ChronoUnit.MINUTES);
+        System.out.println("🔔 Checking todos between: " + now + " and " + tenMinutesFromNow);
         
         List<Todo> todosDueSoon = todoRepository.findTodosDueBetween(now, tenMinutesFromNow);
+        System.out.println("🔔 Found: " + todosDueSoon.size() + " todos due soon");
         
         for (Todo todo : todosDueSoon) {
             try {
@@ -47,7 +49,7 @@ public class TodoNotificationScheduler {
         }
     }
     
-    @Scheduled(fixedRate = 300000) // every 5 minutes
+    @Scheduled(fixedRate = 30000) // every 5 minutes
     public void checkDueTodosWithinHour() {
         Instant now = Instant.now();
         Instant start = now.plus(55, ChronoUnit.MINUTES);
