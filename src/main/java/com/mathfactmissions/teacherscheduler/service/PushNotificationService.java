@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -38,16 +37,22 @@ public class PushNotificationService {
     }
     
     public void sendTodoDueNotification(Todo todo) {
-        List<PushSubscription> subscriptions = pushSubscriptionService.getSubscriptionsByUserId(todo.getUserId());
+        sendTodoNotification(todo, "Todo Due!",
+            String.format("'%s' is due now!", todo.getText()));
+    }
+    
+    public void sendTodoDueInHourNotification(Todo todo) {
+        sendTodoNotification(todo, "Todo Coming Up!",
+            String.format("'%s' is due in about an hour", todo.getText()));
+    }
+    
+    private void sendTodoNotification(Todo todo, String title, String body) {
+        List<PushSubscription> subscriptions =
+            pushSubscriptionService.getSubscriptionsByUserId(todo.getUserId());
         
-        String title = "Todo Due Soon!";
-        
-        String body = String.format("'%s'",
-            todo.getText()
-        );
-        
+        User user = todo.getTodoList().getUser();
         String dateString = todo.getDueDate()
-            .atZone(ZoneId.systemDefault())
+            .atZone(user.getTimeZone())
             .toLocalDate()
             .format(DateTimeFormatter.ISO_LOCAL_DATE);
         
@@ -79,46 +84,6 @@ public class PushNotificationService {
         sendNotificationToSubscriptions(subscriptions, payload, todo.getId().toString());
     }
     
-    public void sendTodoOverdueNotification(Todo todo) {
-        List<PushSubscription> subscriptions = pushSubscriptionService.getSubscriptionsByUserId(todo.getUserId());
-        
-        String title = "Todo Overdue!";
-        String body = String.format("'%s' was due and is now overdue", todo.getText());
-        
-        // Extract date from todo's due date and format it for the URL
-        String dateString = todo.getDueDate()
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
-            .format(DateTimeFormatter.ISO_LOCAL_DATE);
-        
-        String targetUrl = String.format("/dashboard/daily/%s?view=todos", dateString);
-        
-        String payload = String.format("""
-            {
-                "title": "%s",
-                "body": "%s",
-                "icon": "/icon-192x192.png",
-                "badge": "/badge-72x72.png",
-                "data": {
-                    "todoId": "%s",
-                    "url": "%s",
-                    "type": "todo_overdue"
-                },
-                "actions": [
-                    {
-                        "action": "mark-complete",
-                        "title": "Mark Complete"
-                    },
-                    {
-                        "action": "snooze",
-                        "title": "Snooze 1hr"
-                    }
-                ]
-            }
-            """, escapeJson(title), escapeJson(body), todo.getId(), targetUrl);
-        
-        sendNotificationToSubscriptions(subscriptions, payload, todo.getId().toString());
-    }
     
     private void sendNotificationToSubscriptions(List<PushSubscription> subscriptions, String payload, String todoId) {
         for (PushSubscription subscription : subscriptions) {

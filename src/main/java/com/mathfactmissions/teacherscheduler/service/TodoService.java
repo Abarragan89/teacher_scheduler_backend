@@ -66,7 +66,6 @@ public class TodoService {
         if (dueDate != null && !dueDate.equals(oldDueDate)) {
             currentTodo.setNotificationSent(false);
             currentTodo.setNotificationSentAt(null);
-            currentTodo.setOverdueNotificationSent(false);
         }
         
         if (Boolean.TRUE.equals(completed)) {

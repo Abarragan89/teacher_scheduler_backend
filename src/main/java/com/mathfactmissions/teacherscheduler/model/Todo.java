@@ -12,7 +12,6 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -54,8 +53,8 @@ public class Todo {
     private Instant notificationSentAt;
     
     @Builder.Default
-    @Column(name = "overdue_notification_sent", nullable = false)
-    private boolean overdueNotificationSent = false;
+    @Column(name = "hour_warning_notification_sent", nullable = false)
+    private boolean hourWarningNotificationSent = false;
     
     @CreatedDate
     @Column(name = "created_at", updatable = false)

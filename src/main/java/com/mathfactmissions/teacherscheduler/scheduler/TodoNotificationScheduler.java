@@ -27,59 +27,46 @@ public class TodoNotificationScheduler {
     private final PushNotificationService pushNotificationService;
     private final RecurrencePatternService recurrencePatternService;
     
-    /**
-     * Check for todos due in the next 10 minutes
-     * Runs every 5 minutes for good balance of precision vs efficiency
-     */
-    @Scheduled(fixedRate = 30000) // Every 5 minutes (300,000 milliseconds)
+    
+    @Scheduled(fixedRate = 300000) // every 5 minutes
     public void checkDueTodos() {
         Instant now = Instant.now();
-        
         Instant tenMinutesFromNow = now.plus(10, ChronoUnit.MINUTES);
         
         List<Todo> todosDueSoon = todoRepository.findTodosDueBetween(now, tenMinutesFromNow);
         
         for (Todo todo : todosDueSoon) {
             try {
-                // Send push notification
                 pushNotificationService.sendTodoDueNotification(todo);
-                
-                // Mark as notified to prevent duplicate notifications
                 todo.setNotificationSent(true);
                 todo.setNotificationSentAt(Instant.now());
                 todoRepository.save(todo);
-                
             } catch (Exception e) {
-                System.err.println("❌ Failed to send notification for todo: " + e.getMessage());
+                System.err.println("❌ Failed to send 10-min notification: " + e.getMessage());
             }
         }
     }
     
-    
-    /**
-     * Check for overdue todos that haven't been notified yet
-     * Runs every hour to catch overdue items
-     */
-    @Scheduled(cron = "0 0,30 * * * *") // Every half-hour at minute 0
-    public void checkOverdueTodos() {
+    @Scheduled(fixedRate = 300000) // every 5 minutes
+    public void checkDueTodosWithinHour() {
         Instant now = Instant.now();
-        List<Todo> overdueTodos = todoRepository.findOverdueTodos(now);
+        Instant fiftyMinutesFromNow = now.plus(50, ChronoUnit.MINUTES);
+        Instant sixtyMinutesFromNow = now.plus(60, ChronoUnit.MINUTES);
         
-        for (Todo todo : overdueTodos) {
+        List<Todo> todosDueInHour = todoRepository.findTodosHourWarningDueBetween(fiftyMinutesFromNow, sixtyMinutesFromNow);
+        
+        for (Todo todo : todosDueInHour) {
             try {
-                
-                // Send overdue notification
-                pushNotificationService.sendTodoOverdueNotification(todo);
-                
-                // Mark as overdue notification sent
-                todo.setOverdueNotificationSent(true);
+                pushNotificationService.sendTodoDueInHourNotification(todo);
+                todo.setHourWarningNotificationSent(true);
+                todo.setNotificationSentAt(Instant.now());
                 todoRepository.save(todo);
-                
             } catch (Exception e) {
-                System.err.println("❌ Failed to send overdue notification for todo: " + " - " + e.getMessage());
+                System.err.println("❌ Failed to send 1-hour notification: " + e.getMessage());
             }
         }
     }
+    
     
     /**
      * Send daily morning reminders

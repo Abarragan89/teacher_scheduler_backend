@@ -26,12 +26,15 @@ public interface TodoRepository extends JpaRepository<Todo, UUID> {
     @Query("""
             SELECT t FROM Todo t
             JOIN FETCH t.todoList tl
-            WHERE t.dueDate < :now
-            AND t.overdueNotificationSent = false
+            WHERE t.dueDate BETWEEN :start AND :end
+            AND t.hourWarningNotificationSent = false
             AND t.completed = false
             ORDER BY t.dueDate ASC
         """)
-    List<Todo> findOverdueTodos(@Param("now") Instant now);
+    List<Todo> findTodosHourWarningDueBetween(
+        @Param("start") Instant start,
+        @Param("end") Instant end
+    );
     
     @Query("""
             SELECT t FROM Todo t
