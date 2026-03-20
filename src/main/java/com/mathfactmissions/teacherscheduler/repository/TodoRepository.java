@@ -12,11 +12,12 @@ import java.util.UUID;
 public interface TodoRepository extends JpaRepository<Todo, UUID> {
     @Query("""
             SELECT t FROM Todo t
-            JOIN FETCH t.todoList tl
-            WHERE t.dueDate BETWEEN :start AND :end
-            AND t.notificationSent = false
-            AND t.completed = false
-            ORDER BY t.dueDate ASC
+              JOIN FETCH t.todoList tl
+              JOIN FETCH tl.user u
+              WHERE t.dueDate >= :start AND t.dueDate < :end
+              AND t.notificationSent = false
+              AND t.completed = false
+              ORDER BY t.dueDate ASC
         """)
     List<Todo> findTodosDueBetween(
         @Param("start") Instant start,
@@ -24,12 +25,13 @@ public interface TodoRepository extends JpaRepository<Todo, UUID> {
     );
     
     @Query("""
-            SELECT t FROM Todo t
-            JOIN FETCH t.todoList tl
-            WHERE t.dueDate BETWEEN :start AND :end
-            AND t.hourWarningNotificationSent = false
-            AND t.completed = false
-            ORDER BY t.dueDate ASC
+           SELECT t FROM Todo t
+           JOIN FETCH t.todoList tl
+           JOIN FETCH tl.user u
+           WHERE t.dueDate >= :start AND t.dueDate < :end
+           AND t.hourWarningNotificationSent = false
+           AND t.completed = false
+           ORDER BY t.dueDate ASC
         """)
     List<Todo> findTodosHourWarningDueBetween(
         @Param("start") Instant start,

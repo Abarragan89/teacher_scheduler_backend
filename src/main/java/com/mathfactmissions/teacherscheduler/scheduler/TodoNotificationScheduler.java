@@ -7,6 +7,7 @@ import com.mathfactmissions.teacherscheduler.repository.TodoRepository;
 import com.mathfactmissions.teacherscheduler.repository.UserRepository;
 import com.mathfactmissions.teacherscheduler.service.PushNotificationService;
 import com.mathfactmissions.teacherscheduler.service.RecurrencePatternService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -26,7 +27,6 @@ public class TodoNotificationScheduler {
     private final UserRepository userRepository;
     private final PushNotificationService pushNotificationService;
     private final RecurrencePatternService recurrencePatternService;
-    
     
     @Scheduled(fixedRate = 30000) // every 5 minutes
     public void checkDueTodos() {
@@ -73,6 +73,7 @@ public class TodoNotificationScheduler {
     /**
      * Send daily morning reminders
      */
+    @Transactional
     @Scheduled(cron = "0 0,15,30,45 * * * *")
     public void sendDailyMorningReminders() {
         LocalTime targetTime = LocalTime.of(6, 30);
@@ -106,6 +107,7 @@ public class TodoNotificationScheduler {
         }
     }
     
+    @Transactional
     @Scheduled(cron = "0 0,15,30,45 * * * 0")
     public void sendWeeklyUpcomingReminders() {
         LocalTime targetTime = LocalTime.of(20, 0);
