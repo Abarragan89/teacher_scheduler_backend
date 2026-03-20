@@ -18,9 +18,9 @@ public class DeleteCompletedTodos {
     
     @Modifying
     @Transactional
-    @Scheduled(cron = "0 0 * * * *") // every hour
+    @Scheduled(cron = "0 0 0 * * *") // every day at midnight
     public void purgeCompletedTodos() {
-        Instant cutoff = Instant.now().minus(24, ChronoUnit.HOURS);
+        Instant cutoff = Instant.now().minus(10, ChronoUnit.DAYS);
         todoRepository.deleteByCompletedTrueAndCompletedAtBefore(cutoff);
     }
 }
