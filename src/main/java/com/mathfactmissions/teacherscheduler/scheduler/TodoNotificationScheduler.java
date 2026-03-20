@@ -28,7 +28,7 @@ public class TodoNotificationScheduler {
     private final PushNotificationService pushNotificationService;
     private final RecurrencePatternService recurrencePatternService;
     
-    @Scheduled(fixedRate = 30000) // every 5 minutes
+    @Scheduled(fixedRate = 300000) // every 5 minutes
     public void checkDueTodos() {
         Instant now = Instant.now();
         Instant tenMinutesFromNow = now.plus(10, ChronoUnit.MINUTES);
@@ -49,7 +49,7 @@ public class TodoNotificationScheduler {
         }
     }
     
-    @Scheduled(fixedRate = 30000) // every 5 minutes
+    @Scheduled(fixedRate = 300000) // every 5 minutes
     public void checkDueTodosWithinHour() {
         Instant now = Instant.now();
         Instant start = now.plus(55, ChronoUnit.MINUTES);
