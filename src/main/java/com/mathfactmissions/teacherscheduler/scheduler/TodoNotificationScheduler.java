@@ -50,10 +50,10 @@ public class TodoNotificationScheduler {
     @Scheduled(fixedRate = 300000) // every 5 minutes
     public void checkDueTodosWithinHour() {
         Instant now = Instant.now();
-        Instant fiftyMinutesFromNow = now.plus(50, ChronoUnit.MINUTES);
-        Instant sixtyMinutesFromNow = now.plus(60, ChronoUnit.MINUTES);
+        Instant start = now.plus(55, ChronoUnit.MINUTES);
+        Instant end = now.plus(70, ChronoUnit.MINUTES);
         
-        List<Todo> todosDueInHour = todoRepository.findTodosHourWarningDueBetween(fiftyMinutesFromNow, sixtyMinutesFromNow);
+        List<Todo> todosDueInHour = todoRepository.findTodosHourWarningDueBetween(start, end);
         
         for (Todo todo : todosDueInHour) {
             try {
