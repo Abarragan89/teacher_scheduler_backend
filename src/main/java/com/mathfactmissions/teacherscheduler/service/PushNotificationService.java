@@ -121,7 +121,7 @@ public class PushNotificationService {
         // Build body summarizing todos
         String body;
         if (todos.size() == 1) {
-            body = todos.getFirst().text();
+            body = todos.get(0).text();
         } else {
             body = String.format("%d todos scheduled for today.",
                 todos.size()
