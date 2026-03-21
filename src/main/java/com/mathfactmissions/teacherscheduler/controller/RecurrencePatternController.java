@@ -38,7 +38,7 @@ public class RecurrencePatternController {
         @AuthenticationPrincipal UserPrincipal userInfo
     ) {
         return ResponseEntity.ok(
-            recurrencePatternService.getNextOccurrenceForEachPattern(userInfo.getId())
+            recurrencePatternService.getNextOccurrenceForEachPattern(userInfo.getId(), userInfo.getTimeZone())
         );
     }
     

@@ -41,15 +41,15 @@ public class TodoListService {
         return todoListRepository.save(currentList);
     }
     
-    public List<TodoListResponse> getTodoLists(UUID userId) {
+    public List<TodoListResponse> getTodoLists(UUID userId, String timeZone) {
         User user = userService.findById(userId)
             .orElseThrow(() -> new RuntimeException("No user found"));
         
         List<TodoList> lists = todoListRepository.findAllByUserOrderByUpdatedAtDesc(user)
-            .orElseThrow(() -> new RuntimeException("no lists found"));
+            .orElse(Collections.emptyList());
         
         // Fetch next occurrences for all patterns
-        List<TodoResponse> nextOccurrences = recurrencePatternService.getNextOccurrenceForEachPattern(userId);
+        List<TodoResponse> nextOccurrences = recurrencePatternService.getNextOccurrenceForEachPattern(userId, timeZone);
         
         // Group occurrences by todoListId
         Map<UUID, List<TodoResponse>> occurrencesByList = nextOccurrences.stream()
@@ -85,26 +85,24 @@ public class TodoListService {
     }
     
     
-    public Boolean deleteListItem(UUID todoId, UUID userId) {
+    public void deleteListItem(UUID todoId, UUID userId) {
         if (!todoListRepository.existsByIdAndUser_Id(todoId, userId)) {
-            return false; // nothing to delete
+            throw new RuntimeException("Todo list not found for id: " + todoId);
         }
-        
         todoListRepository.deleteById(todoId);
-        return true;
     }
     
-    public Boolean setDefaultList(UUID userId, UUID todoListId) {
+    public void setDefaultList(UUID userId, UUID todoListId) {
         User user = userService.findById(userId)
-            .orElseThrow(() -> new RuntimeException("no user found"));
+            .orElseThrow(() -> new RuntimeException("User not found for id: " + userId));
         
-        todoListRepository.findAllByUserOrderByUpdatedAtDesc(user)
-            .ifPresent(lists ->
-                lists.forEach(todoList -> {
-                    todoList.setIsDefault(todoList.getId().equals(todoListId));
-                    todoListRepository.save(todoList);
-                })
-            );
-        return true;
+        List<TodoList> lists = todoListRepository.findAllByUserOrderByUpdatedAtDesc(user)
+            .orElse(Collections.emptyList());
+        
+        lists.forEach(todoList ->
+            todoList.setIsDefault(todoList.getId().equals(todoListId))
+        );
+        
+        todoListRepository.saveAll(lists); // ✅ single batch save
     }
 }

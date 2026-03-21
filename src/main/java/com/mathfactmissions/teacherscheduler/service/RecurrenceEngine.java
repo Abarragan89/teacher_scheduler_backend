@@ -43,7 +43,7 @@ public class RecurrenceEngine {
         
         switch (pattern.getType()) {
             case DAILY -> occurrences.addAll(
-                calculateDailyOccurrences(pattern, effectiveStart, effectiveEnd)
+                calculateDailyOccurrences(effectiveStart, effectiveEnd)
             );
             case WEEKLY -> occurrences.addAll(
                 calculateWeeklyOccurrences(pattern, effectiveStart, effectiveEnd)
@@ -59,7 +59,7 @@ public class RecurrenceEngine {
         return occurrences;
     }
     
-    private List<LocalDate> calculateDailyOccurrences(RecurrencePattern pattern, LocalDate start, LocalDate end) {
+    private List<LocalDate> calculateDailyOccurrences(LocalDate start, LocalDate end) {
         List<LocalDate> occurrences = new ArrayList<>();
         
         while (!start.isAfter(end)) {
@@ -191,6 +191,9 @@ public class RecurrenceEngine {
             // Check if it's still in the same month
             return nthWeekdayDate.getMonth() == month.getMonth() ? nthWeekdayDate : null;
         } catch (Exception e) {
+            System.err.println("⚠️ Failed to find nth weekday in month: "
+                + month + " nth=" + nthOccurrence + " weekday=" + weekday
+                + " - " + e.getMessage());
             return null;
         }
     }
@@ -213,8 +216,9 @@ public class RecurrenceEngine {
                     occurrences.add(occurrence);
                 }
             } catch (DateTimeException e) {
-                // Invalid date (like Feb 29 in non-leap year)
-                System.out.println("Error making year i think??>.. in recurrence engine");
+                System.err.println("⚠️ Skipping invalid yearly date: "
+                    + pattern.getYearlyMonth() + "/" + pattern.getYearlyDay()
+                    + " for year " + year + " (likely Feb 29 in non-leap year)");
             }
         }
         

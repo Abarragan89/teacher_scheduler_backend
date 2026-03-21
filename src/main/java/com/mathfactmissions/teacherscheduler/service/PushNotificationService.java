@@ -9,7 +9,6 @@ import nl.martijndwars.webpush.PushService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -97,9 +96,13 @@ public class PushNotificationService {
                 
                 pushService.send(notification);
             } catch (Exception e) {
-                // Remove invalid subscriptions (expired/uninstalled app)
-                if (e.getMessage().contains("410") || e.getMessage().contains("invalid")) {
+                if (e.getMessage() != null &&
+                    (e.getMessage().contains("410") || e.getMessage().contains("invalid"))) {
+                    System.err.println("🗑️ Removing stale subscription: " + subscription.getEndpoint());
                     pushSubscriptionService.removeSubscription(subscription.getEndpoint());
+                } else {
+                    System.err.println("❌ Failed to send push notification to: "
+                        + subscription.getEndpoint() + " - " + e.getMessage());
                 }
             }
         }
@@ -118,18 +121,14 @@ public class PushNotificationService {
         // Build body summarizing todos
         String body;
         if (todos.size() == 1) {
-            body = todos.get(0).text();
+            body = todos.getFirst().text();
         } else {
             body = String.format("%d todos scheduled for today.",
-                todos.size(),
-                todos.get(0).text()
+                todos.size()
             );
         }
         
-        // Link to today's daily view
-        String dateString = LocalDate.now(user.getTimeZone())
-            .format(DateTimeFormatter.ISO_LOCAL_DATE);
-        String targetUrl = String.format("/dashboard/todo-reminder-range?view=today", dateString);
+        String targetUrl = "/dashboard/todo-reminder-range?view=today";
         
         String payload = String.format("""
             {
@@ -158,10 +157,7 @@ public class PushNotificationService {
             body = String.format("You have %d todos coming up this week.", todos.size());
         }
         
-        // Link to today's date as entry point
-        String dateString = LocalDate.now(user.getTimeZone())
-            .format(DateTimeFormatter.ISO_LOCAL_DATE);
-        String targetUrl = String.format("/dashboard/todo-reminder-range?view=week", dateString);
+        String targetUrl = "/dashboard/todo-reminder-range?view=week";
         
         String payload = String.format("""
             {

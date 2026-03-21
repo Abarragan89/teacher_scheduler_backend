@@ -16,7 +16,6 @@ import com.mathfactmissions.teacherscheduler.repository.TodoListRepository;
 import com.mathfactmissions.teacherscheduler.repository.TodoOverrideRepository;
 import com.mathfactmissions.teacherscheduler.repository.TodoRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +23,7 @@ import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
+
 @Service
 @RequiredArgsConstructor
 public class RecurrencePatternService {
@@ -162,9 +161,10 @@ public class RecurrencePatternService {
             .build();
     }
     
-    public List<TodoResponse> getNextOccurrenceForEachPattern(UUID userId) {
+    public List<TodoResponse> getNextOccurrenceForEachPattern(UUID userId, String timeZone) {
         List<RecurrencePattern> patterns = recurrencePatternRepository.findByUserId(userId);
-        LocalDate today = LocalDate.now();
+        ZoneId zone = ZoneId.of(timeZone);
+        LocalDate today = LocalDate.now(zone);
         
         return patterns.stream()
             .map(pattern -> {
@@ -218,8 +218,6 @@ public class RecurrencePatternService {
     public TodoResponse updateVirtualOccurrence(UpdateTodoRequest request) {
         UUID patternId = request.patternId();
         
-        System.out.println("request due date" + request.dueDate());
-        
         RecurrencePattern pattern = recurrencePatternRepository.findById(patternId)
             .orElseThrow(() -> new RuntimeException("Pattern not found"));
         
@@ -231,16 +229,18 @@ public class RecurrencePatternService {
             String[] parts = request.todoId().split("_", 3);
             LocalDate date = LocalDate.parse(parts[2]);
             
-            TodoList todoList = pattern.getTodoList();
+            TodoList todoList;
             
             if (!request.todoListId().equals(pattern.getTodoList().getId())) {
                 todoList = todoListRepository.findById(request.todoListId())
                     .orElseThrow(() -> new RuntimeException("Todo list not found"));
+            } else {
+                todoList = pattern.getTodoList();
             }
             
             override = todoOverrideRepository
                 .findByRecurrencePattern_IdAndOriginalDate(patternId, date)
-                .orElse(TodoOverride.builder()
+                .orElseGet(() -> TodoOverride.builder()  // ← only runs if nothing was found
                     .recurrencePattern(pattern)
                     .todoList(todoList)
                     .originalDate(date)
@@ -330,13 +330,15 @@ public class RecurrencePatternService {
         // Update recurrence type specific fields
         applyRecurrencePatternFields(pattern, request.recurrencePattern());
         
-        recurrencePatternRepository.save(pattern);
         
         if (request.todoListId() != null && !request.todoListId().equals(pattern.getTodoList().getId())) {
             TodoList todoList = todoListRepository.findById(request.todoListId())
                 .orElseThrow(() -> new RuntimeException("Todo list not found"));
             pattern.setTodoList(todoList);
         }
+        
+        recurrencePatternRepository.save(pattern);
+        
         
         todoOverrideRepository.deleteByRecurrencePattern_IdAndOriginalDateGreaterThanEqual(
             patternId, fromDate
@@ -379,7 +381,7 @@ public class RecurrencePatternService {
         
         // Make sure this pattern belongs to the user
         if (!pattern.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Unauthorized");
+            throw new RuntimeException("User " + userId + " is not authorized to delete pattern " + patternId);
         }
         
         // Delete the pattern
@@ -401,7 +403,7 @@ public class RecurrencePatternService {
             
             override = todoOverrideRepository
                 .findByRecurrencePattern_IdAndOriginalDate(patternId, date)
-                .orElse(TodoOverride.builder()
+                .orElseGet(() -> TodoOverride.builder()
                     .recurrencePattern(pattern)
                     .todoList(pattern.getTodoList())
                     .originalDate(date)

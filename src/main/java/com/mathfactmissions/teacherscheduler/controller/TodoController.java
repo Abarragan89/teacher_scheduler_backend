@@ -7,7 +7,6 @@ import com.mathfactmissions.teacherscheduler.security.UserPrincipal;
 import com.mathfactmissions.teacherscheduler.service.RecurrencePatternService;
 import com.mathfactmissions.teacherscheduler.service.TodoService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -76,19 +75,8 @@ public class TodoController {
     
     @DeleteMapping("/delete-list-item/{todoId}")
     public ResponseEntity<String> deleteListItem(@PathVariable UUID todoId) {
-        try {
-            boolean deleted = todoService.deleteListItem(todoId);
-            
-            if (!deleted) {
-                return ResponseEntity.ok("Todo deleted");
-            }
-            
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Failed to delete todos");
-        }
-        
-        return ResponseEntity.noContent().build();
+        todoService.deleteListItem(todoId);
+        return ResponseEntity.ok("Todo deleted");
     }
     
     

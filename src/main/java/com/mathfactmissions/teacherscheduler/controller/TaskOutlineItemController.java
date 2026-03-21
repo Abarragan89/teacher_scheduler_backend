@@ -20,78 +20,73 @@ import java.util.UUID;
 @RestController
 @RequestMapping("task-outline-item")
 public class TaskOutlineItemController {
-
+    
+    private final TaskOutlineItemService taskOutlineItemService;
     @Value("${app.public-token}")
     private String publicToken;
-
-    private final TaskOutlineItemService taskOutlineItemService;
-
+    
     public TaskOutlineItemController(
-            TaskOutlineItemService taskOutlineItemService
+        TaskOutlineItemService taskOutlineItemService
     ) {
         this.taskOutlineItemService = taskOutlineItemService;
     }
-
+    
     @PostMapping("/create")
     public TaskOutlineResponse createTaskOutline(@Valid @RequestBody TaskOutlineRequest request
     ) {
         return taskOutlineItemService.addTaskOutlineItem(
-                request.taskId(),
-                request.position(),
-                request.indentLevel(),
-                request.text()
+            request.taskId(),
+            request.position(),
+            request.indentLevel(),
+            request.text()
         );
     }
-
+    
     @PutMapping("/toggle-complete")
     public TaskOutlineResponse toggleCompleteStatus(
-            @RequestHeader(value = "X-Public-Token", required = true) String token,
-            @Valid @RequestBody UpdateTaskOutlineItemRequest request
+        @RequestHeader(value = "X-Public-Token", required = true) String token,
+        @Valid @RequestBody UpdateTaskOutlineItemRequest request
     ) {
         if (token == null || !token.equals(publicToken)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid token");
         }
         return taskOutlineItemService.toggleComplete(request.id(), request.completed());
     }
-
-
+    
+    
     @PutMapping("/update-item")
     public TaskOutlineResponse updateTaskOutlineItem(
-            @Valid
-            @RequestBody
-            UpdateTaskOutlineItemRequest
+        @Valid
+        @RequestBody
+        UpdateTaskOutlineItemRequest
             request
-    ){
+    ) {
         return taskOutlineItemService.updateTaskOutlineItem(
-                request.id(),
-                request.text(),
-                request.completed(),
-                request.indentLevel(),
-                request.position()
+            request.id(),
+            request.text(),
+            request.completed(),
+            request.indentLevel(),
+            request.position()
         );
     }
-
+    
     @DeleteMapping("/delete/{itemId}")
     public ResponseEntity<Void> deleteTaskOutlineItem(@PathVariable UUID itemId) {
         taskOutlineItemService.deleteTaskItem(itemId);
-
+        
         return ResponseEntity.noContent().build();
     }
-
+    
     @PutMapping("/batch-update-positions")
-    public ResponseEntity<?> batchUpdateOutlineItemPositions(@RequestBody BatchOutlinePositionUpdateRequest request) {
-        try {
-            List<OutlineItemPositionUpdateDTO> items = request.items();
-            taskOutlineItemService.batchUpdateOutlineItemPositions(items);
-            return ResponseEntity.ok(Map.of(
-                    "message", "Outline item positions updated successfully",
-                    "updatedCount", items.size()
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of(
-                    "error", "Batch update failed: " + e.getMessage()
-            ));
-        }
+    public ResponseEntity<Map<String, Object>> batchUpdateOutlineItemPositions(
+        @RequestBody BatchOutlinePositionUpdateRequest request
+    ) {
+        List<OutlineItemPositionUpdateDTO> items = request.items();
+        taskOutlineItemService.batchUpdateOutlineItemPositions(items);
+        return ResponseEntity.ok(Map.of(
+            "message", "Outline item positions updated successfully",
+            "updatedCount", items.size()
+        ));
     }
-
+    
 }

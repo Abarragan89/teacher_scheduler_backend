@@ -6,9 +6,9 @@ import com.mathfactmissions.teacherscheduler.model.Todo;
 import com.mathfactmissions.teacherscheduler.model.TodoList;
 import com.mathfactmissions.teacherscheduler.repository.TodoListRepository;
 import com.mathfactmissions.teacherscheduler.repository.TodoRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -17,13 +17,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TodoService {
     
-    public final TodoRepository todoRepository;
-    public final TodoListRepository todoListRepository;
+    private final TodoRepository todoRepository;
+    private final TodoListRepository todoListRepository;
     
     @Transactional
     public TodoResponse createTodoItem(CreateTodoRequest request, UUID userId) {
         TodoList todoList = todoListRepository.findByIdAndUser_Id(request.todoListId(), userId)
-            .orElseThrow(() -> new RuntimeException("No todo list found"));
+            .orElseThrow(() -> new RuntimeException("No todo list found" + request.todoListId()));
         
         Todo todo = Todo.builder()
             .todoList(todoList)
@@ -46,13 +46,13 @@ public class TodoService {
         UUID userId
     ) {
         Todo currentTodo = todoRepository.findById(todoId)
-            .orElseThrow(() -> new RuntimeException("no todo found"));
+            .orElseThrow(() -> new RuntimeException("no todo found" + todoId));
         
         TodoList todoList = currentTodo.getTodoList();
         
         if (!todoListId.equals(todoList.getId())) {
             todoList = todoListRepository.findByIdAndUser_Id(todoListId, userId)
-                .orElseThrow(() -> new RuntimeException("no todo list found"));
+                .orElseThrow(() -> new RuntimeException("no todo list found" + todoListId));
         }
         
         Instant oldDueDate = currentTodo.getDueDate();
@@ -66,6 +66,7 @@ public class TodoService {
         if (dueDate != null && !dueDate.equals(oldDueDate)) {
             currentTodo.setNotificationSent(false);
             currentTodo.setNotificationSentAt(null);
+            currentTodo.setHourWarningNotificationSent(false);
         }
         
         if (Boolean.TRUE.equals(completed)) {
@@ -78,11 +79,10 @@ public class TodoService {
         return TodoResponse.fromEntity(todoRepository.save(currentTodo));
     }
     
-    public boolean deleteListItem(UUID todoId) {
+    public void deleteListItem(UUID todoId) {
         if (!todoRepository.existsById(todoId)) {
-            return false;
+            throw new RuntimeException("Todo not found for id: " + todoId);
         }
         todoRepository.deleteById(todoId);
-        return true;
     }
 }

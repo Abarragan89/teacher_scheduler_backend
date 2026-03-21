@@ -25,19 +25,21 @@ public class MagicLinkService {
         this.clientURL = clientURL;
     }
     
-    public void sendMagicLink(String email, String timeZone) throws JOSEException {
-        
-        // Create short-lived JWT
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("magic", true);
-        claims.put("timeZone", timeZone);
-        
-        String magicToken = jwtService.generateToken(email, claims, 15);
-        
-        // Build link
-        String link = clientURL + "/user-verification?token=" + magicToken;
-        
-        // Send email using resend
-        emailService.sendEmail(email, link);
+    public void sendMagicLink(String email, String timeZone) {
+        try {
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("magic", true);
+            claims.put("timeZone", timeZone);
+            
+            String magicToken = jwtService.generateToken(email, claims, 15);
+            String link = clientURL + "/user-verification?token=" + magicToken;
+            
+            emailService.sendEmail(email, link);
+            System.out.println("✅ Magic link sent to: " + email);
+            
+        } catch (JOSEException e) {
+            System.err.println("❌ Failed to generate magic link for: " + email + " - " + e.getMessage());
+            throw new RuntimeException("Failed to generate magic link for " + email, e);
+        }
     }
 }

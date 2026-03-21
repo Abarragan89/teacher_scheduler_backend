@@ -3,9 +3,9 @@ package com.mathfactmissions.teacherscheduler.service;
 import com.mathfactmissions.teacherscheduler.dto.day.response.DayResponse;
 import com.mathfactmissions.teacherscheduler.model.*;
 import com.mathfactmissions.teacherscheduler.repository.DayRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -22,13 +22,13 @@ public class DayService {
     
     public DayResponse findSingleDay(UUID dayId, UUID userId) {
         Day day = dayRepository.findByIdAndUser_Id(dayId, userId)
-            .orElseThrow(() -> new RuntimeException("No Day found"));
+            .orElseThrow(() -> new RuntimeException("Day not found for id: " + dayId));
         return DayResponse.fromEntity(day);
     }
     
     public DayResponse findSingleDayPublic(UUID userId, LocalDate dateString) {
         Day day = dayRepository.findByUser_IdAndDayDate(userId, dateString)
-            .orElseThrow(() -> new RuntimeException("No Day found"));
+            .orElseThrow(() -> new RuntimeException("Day not found for user: " + userId + " on date: " + dateString));
         return DayResponse.fromEntity(day);
     }
     
@@ -46,7 +46,7 @@ public class DayService {
         Day targetDay = dayRepository.findByUser_IdAndDayDate(userId, dayDate)
             .orElseGet(() -> {
                 User user = userService.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new RuntimeException("User not found for id: " + userId));
                 Day newDay = new Day();
                 newDay.setUser(user);
                 newDay.setDayDate(dayDate);
@@ -114,27 +114,6 @@ public class DayService {
         
         // Create Schedule
         Schedule schedule = new Schedule();
-        schedule.setDay(newDay);
-        newDay.setSchedule(schedule);
-        
-        // Save Day with schedule embedded
-        dayRepository.save(newDay);
-        
-        // Return DTO
-        return DayResponse.fromEntity(newDay);
-    }
-    
-    private DayResponse createNewDayWithPopulatedSchedule(UUID userId, LocalDate dayDate, UUID scheduleId) {
-        User user = userService.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        // Create Day
-        Day newDay = new Day();
-        newDay.setUser(user);
-        newDay.setDayDate(dayDate);
-        
-        // Create Schedule
-        Schedule schedule = scheduleService.findById(scheduleId);
         schedule.setDay(newDay);
         newDay.setSchedule(schedule);
         

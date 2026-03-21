@@ -10,11 +10,11 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
-
+    
     private final ScheduleRepository scheduleRepository;
-
+    
     public Schedule findById(UUID id) {
         return scheduleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("schedule not found"));
+            .orElseThrow(() -> new RuntimeException("Schedule not found for id: " + id));
     }
 }
