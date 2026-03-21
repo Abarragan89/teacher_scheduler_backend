@@ -72,6 +72,8 @@ public class DayService {
                 Task newTask = new Task();
                 newTask.setTitle(task.getTitle());
                 newTask.setCompleted(false);
+                newTask.setStartTime(task.getStartTime());
+                newTask.setEndTime(task.getEndTime());
                 newTask.setPosition(task.getPosition());
                 newTask.setSchedule(newSchedule);
                 
