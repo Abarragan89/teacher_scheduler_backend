@@ -111,7 +111,7 @@ public class TodoNotificationScheduler {
      * Send weekly reminder of todos
      */
     @Transactional
-    @Scheduled(cron = "0 0,15,30,45 * * * 0")
+    @Scheduled(cron = "0 0,15,30,45 * * * TUE")
     public void sendWeeklyUpcomingReminders() {
         LocalTime targetTime = LocalTime.of(20, 0);
         List<User> users = userRepository.findAll();
