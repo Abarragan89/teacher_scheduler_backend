@@ -107,6 +107,9 @@ public class TodoNotificationScheduler {
         }
     }
     
+    /**
+     * Send weekly reminder of todos
+     */
     @Transactional
     @Scheduled(cron = "0 0,15,30,45 * * * 0")
     public void sendWeeklyUpcomingReminders() {

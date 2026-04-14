@@ -32,7 +32,7 @@ public class MagicLinkService {
             claims.put("timeZone", timeZone);
             
             String magicToken = jwtService.generateToken(email, claims, 15);
-            String link = clientURL + "/user-verification?token=" + magicToken;
+            String link = clientURL + "user-verification?token=" + magicToken;
             
             emailService.sendEmail(email, link);
             System.out.println("✅ Magic link sent to: " + email);
