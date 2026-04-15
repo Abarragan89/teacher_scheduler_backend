@@ -1,6 +1,7 @@
 package com.mathfactmissions.teacherscheduler.controller;
 
 import com.mathfactmissions.teacherscheduler.dto.day.request.DayRequest;
+import com.mathfactmissions.teacherscheduler.dto.day.request.UpdateDayNotesRequest;
 import com.mathfactmissions.teacherscheduler.dto.day.response.DayResponse;
 import com.mathfactmissions.teacherscheduler.dto.schedule.request.MoveScheduleRequest;
 import com.mathfactmissions.teacherscheduler.security.UserPrincipal;
@@ -66,6 +67,15 @@ public class DaysController {
         
         dayService.createOrFindDayWithSchedule(userId, request.dayDate(), request.scheduleId());
         return ResponseEntity.ok(true);
+    }
+    
+    @PutMapping("/update-notes")
+    public ResponseEntity<DayResponse> updateDayNotes(
+        @RequestBody @Valid UpdateDayNotesRequest request,
+        @AuthenticationPrincipal UserPrincipal userInfo
+    ) {
+        DayResponse response = dayService.updateNotes(request.dayId(), request.notes());
+        return ResponseEntity.ok(response);
     }
     
 }

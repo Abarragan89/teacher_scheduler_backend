@@ -1,8 +1,10 @@
 package com.mathfactmissions.teacherscheduler.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mathfactmissions.teacherscheduler.dto.day.response.DayResponse;
 import com.mathfactmissions.teacherscheduler.model.*;
 import com.mathfactmissions.teacherscheduler.repository.DayRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,5 +126,13 @@ public class DayService {
         
         // Return DTO
         return DayResponse.fromEntity(newDay);
+    }
+    
+    
+    public DayResponse updateNotes(UUID dayId, JsonNode notes) {
+        Day day = dayRepository.findById(dayId)
+            .orElseThrow(() -> new EntityNotFoundException("Day Not Found"));
+        day.setNotes(notes);
+        return DayResponse.fromEntity(dayRepository.save(day));
     }
 }
